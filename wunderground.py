@@ -107,7 +107,7 @@ class mqttHandler:
         except:
            print("Malformed message topic " + message.topic);
 
-        myValue = message.payload 
+        myValue = message.payload.decode('utf-8')
         #print('MQTT: {}: {}'.format(myKey,myValue))
         current[myKey] = json.loads(myValue);
 
@@ -137,13 +137,13 @@ def main():
         try:
             url = createGET(current)
             print("{}: {}".format(time.asctime(), url))
-            f = urllib.request.urlopen(url)
+            f = urllib.request.urlopen(str(url))
             print("{}: {}".format(time.asctime(), f.read().strip().decode('utf-8')))
             current={}  # success publishing, clear current
         except KeyError:
             print('caught KeyError, missing parameter')
         except urllib.error.URLError as e:
-            print("URLError {}".format(e))
+            print("URLError: {}".format(e))
         except:
             print("some other bizzare error")
 
