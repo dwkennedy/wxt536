@@ -1,0 +1,42 @@
+# send these sentences to configure the messages of the WXT-536
+#  WXT-536 must have serial interface and baud rate configured,
+#   and put into ASCII automatic mode as well
+
+0XU,A=0,M=A,C=2,I=0,B=19200,D=8,P=N,S=1
+0WU,R=11111100&01001000,I=10,A=120,G=1,U=M,D=0,N=W,F=4
+0RU,R=11111100&10000000,I=10,U=M,S=M,M=T,Z=M,X=10000,Y=100
+
+#  strongly recommend that the settings be locked after they are correct
+0RU,H=1
+
+#  to unlock settings
+0RU,H=0
+
+# I changed to this (2 minute average)
+
+0WU wind parameters
+I=10  update interval
+A=120  average interval
+G=1  min/max for speed/direction
+U=M   m/s speed units
+D=0   0 deg direction offset
+F=4   4 Hz sampling rate
+
+0RU rain parameters
+I=10   update interval
+U=M    rain mm, duration s, intensity mm/h
+S=M    hail  accumulated hits/cm^2, duration s, intensity hits/cm^2/h
+M=R    precip on/off mode: send precip messages 10 seconds after detected
+         until Ri = 0 (intensity)
+M=T    precip time based, send every I seconds
+Z=M    counter reset: manual (0XYRU resets the counter)
+X=10000  rain accumulation limit (100mm) only with overflow reset mode
+Y=100    hail accumulation limit (10.0 hits/cm^2) with overflow reset mode
+
+
+# how to send commands via decode.py command channel wxt/cmd
+#  set precip message to interval of I=10 seconds, M=T  time based
+mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0RU,M=T,I=10'
+
+# reset the precip counters (do at midnight local time)
+mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0XZRU'
