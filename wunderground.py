@@ -15,7 +15,7 @@ import wxFormula
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
 BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
-PUBLISHING_INTERVAL = 30   # publish every X seconds
+PUBLISHING_INTERVAL = 60   # publish every X seconds
 
 # documentation for wunderground PWS update
 # https://support.weather.com/s/article/PWS-Upload-Protocol?language=en_US
@@ -146,4 +146,6 @@ if __name__ == '__main__':
             print('caught KeyError')
             time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
             timer = time.time()
+        except:
+            pass  # usually a urlopen network problem
     print("{}: {}".format(time.asctime(), "Wunderground client stops"))
