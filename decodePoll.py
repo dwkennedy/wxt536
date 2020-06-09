@@ -85,8 +85,6 @@ class SocketIO(io.RawIOBase):
     def seekable(self):
         return False
 
-
-global s
 print ('{}: {}'.format(time.asctime(), "decode.py starts"))
 while True:
    try:

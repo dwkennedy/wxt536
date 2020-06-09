@@ -15,7 +15,8 @@ import wxFormula
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
-BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
+#BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
+BASE_URL = "https://rtupdate.wunderground.com/weatherstation/updateweatherstation.php?"
 PUBLISHING_INTERVAL = 60   # publish every X seconds
 
 WUNDERGROUND_ID = 'KOKNORMA6'  # station ID
@@ -87,6 +88,7 @@ def createGET(wxt):
     url += "&baromin={:.3f}".format(baromin)
     url += "&dailyrainin={:.3f}".format(dailyrainin)
     url += "&softwaretype={}".format(softwaretype)
+    url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
 
     return(BASE_URL + url)
 
