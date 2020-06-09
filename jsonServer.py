@@ -24,7 +24,7 @@ WXT_SERIAL = 'N3720229' # PTU S/N N3620062
 TIMEOUT = 20  # seconds before considering current data stale
 
 current = {'validFlag':0}
-current['valid'] = time.time() - TIMEOUT  # stale data to begin with
+current['valid'] = float("{:.1f}".format(time.time() - TIMEOUT))  # stale data to begin with
 
 # this code creates the http server and dispatches commands that are received
 class httpHandler(BaseHTTPRequestHandler):
@@ -76,7 +76,7 @@ class mqttHandler:
 
         myValue = message.payload
         current[myKey] = json.loads(myValue);
-        current['valid'] = time.time()
+        current['valid'] = float("{:.1f}".format(time.time()))
         #print('MQTT: {}: {}'.format(myKey,myValue))
 
     def __init__(self):
