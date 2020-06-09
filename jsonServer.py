@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
-# create http server  (documented at https://docs.python.org/2/library/basehttpserver.html#BaseHTTPServer.BaseHTTPRequestHandler)
-# accept commands encoded in URL
-#
+# create http server
 # return mqtt message content as JSON
 # the web page will format and display the JSON data
-# and periodically update via the URL
+# and periodically update via this server
 #
 # this server subscribes to mqtt server and retains the last value of each message to serve
 #
