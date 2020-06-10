@@ -14,7 +14,7 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
               create http server on PORT_NUMBER and return observations as JSON
                 
 ### pwsweather.py:
-  subscribe to wxt/SERIAL_NUMBER
+    subscribe to wxt/SERIAL_NUMBER
                 publish observations to www.pwsweather.com every PUBLISHING_INTERVAL seconds
                 set pwsweather ID and PASSWORD in this file
                 
