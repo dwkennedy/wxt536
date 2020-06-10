@@ -10,8 +10,8 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
               set station altitude in this file
             
 ### jsonServer.py:
-  subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
-  create http server on PORT_NUMBER and return observations as JSON
+              subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
+              create http server on PORT_NUMBER and return observations as JSON
                 
 ### pwsweather.py:
   subscribe to wxt/SERIAL_NUMBER
