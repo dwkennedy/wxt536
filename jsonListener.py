@@ -7,12 +7,12 @@
 import time
 import json
 import paho.mqtt.client as mqtt
-import metTower
-from netCDF4 import Dataset
+#import metTower
+#from netCDF4 import Dataset
 
 BROKER_ADDRESS = '127.0.0.1'
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
-NETCDF_OUTPUT_DIRECTORY = '/home/doug/netcdf'
+JSON_OUTPUT_DIRECTORY = '/home/doug/netcdf'
 
 # current holds our incoming mqtt data.  it starts out invalid and out-of-date
 current = {'time': 0}
@@ -38,7 +38,7 @@ class mqttHandler:
 
         #  check to see if netcdf file exists
         (tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday,tm_yday,tm_isdst)=time.gmtime(current['time'])
-        new_filename = "{}/clamps_sfc_{:04d}{:02d}{:02d}.json".format(NETCDF_OUTPUT_DIRECTORY,tm_year,tm_mon,tm_mday)
+        new_filename = "{}/clamps_sfc_{:04d}{:02d}{:02d}.json".format(JSON_OUTPUT_DIRECTORY,tm_year,tm_mon,tm_mday)
         if (self.filename != new_filename):
            if (self.filename != ''):
               self.filehandle.close()
