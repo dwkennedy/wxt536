@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 # this server subscribes to mqtt server and retains the last value of each message to serve
 #  upload data to wunderground every minute
 
@@ -9,15 +8,17 @@ import json
 import re
 import urllib.request
 import urllib.error
+import urllib.parse
 import paho.mqtt.client as mqtt
 import math
 import wxFormula
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
-#BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
-BASE_URL = "https://rtupdate.wunderground.com/weatherstation/updateweatherstation.php?"
-PUBLISHING_INTERVAL = 60   # publish every X seconds
+BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
+# optional for realtime update
+#BASE_URL = "https://rtupdate.wunderground.com/weatherstation/updateweatherstation.php?"
+PUBLISHING_INTERVAL = 300   # publish every X seconds
 
 WUNDERGROUND_ID = 'KOKNORMA6'  # station ID
 WUNDERGROUND_PASSWORD = '78ce9f30'
@@ -45,7 +46,8 @@ def mbar2inhg(mbar):
 def createGET(wxt):
     # set to missing values
     action = 'updateraw'
-    dateutc = 'now'
+    #dateutc = 'now'
+    dateutc = urllib.parse.quote_plus(time.strftime("%Y-%m-%d %H:%M:%S",time.gmtime()))
     winddir_avg2m = 0 # 'Dm'
     windspeedmph_avg2m = ms2mph(0) # 'Sm'  # convert from m/s to mph
     windgustmph = ms2mph(0)  # 'Sx'  # convert from m/s to mph
@@ -88,7 +90,8 @@ def createGET(wxt):
     url += "&baromin={:.3f}".format(baromin)
     url += "&dailyrainin={:.3f}".format(dailyrainin)
     url += "&softwaretype={}".format(softwaretype)
-    url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
+    # optional for realtime wunderground server
+    #url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
 
     return(BASE_URL + url)
 

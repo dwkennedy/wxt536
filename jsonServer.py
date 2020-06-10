@@ -18,7 +18,7 @@ import paho.mqtt.client as mqtt
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 4444
 BROKER_ADDRESS = '127.0.0.1'
-WXT_SERIAL = 'N3720229' # PTU S/N N3620062
+WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
 TIMEOUT = 20  # seconds before considering current data stale
 
 current = {'validFlag':0}

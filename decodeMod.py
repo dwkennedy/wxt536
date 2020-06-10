@@ -105,15 +105,14 @@ client.connect(LOCAL_BROKER_ADDRESS)
 client.loop_start()
 client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))  # subscribe to command channel
 
-timer = time.time()-WXT_POLLING_INTERVAL  # set up for immediate message
 while True:
     param = {}
     line = '';
-    sleepy = WXT_POLLING_INTERVAL - (time.time() - timer)
+    # wait for next time 
+    sleepy = WXT_POLLING_INTERVAL - (time.time() % WXT_POLLING_INTERVAL)
     if sleepy > 0:
         time.sleep(sleepy)  # wait WXT_POLLING_INTERVAL sec from time of last poll
-    timer = time.time()  # reset timer
-    print("----- flushing socket");
+    print("----- flushing socket at {}".format(time.asctime()));
     s.setblocking(False)
     while True:
        try:
@@ -126,6 +125,7 @@ while True:
     print("----- sending 0R command");
     s.send(u'0R\r\n'.encode())  # send command to return all sentences
     print("+++++ reading sentences");
+    timer = time.time()  # reset timer
     for index in range(4):  # read four lines of response (0R1,0R2,0R3,0R5)
        try:
           line=file.readline().decode('ISO-8859-1')
@@ -170,6 +170,7 @@ while True:
     except:
        print("error computing MSL pressure")
 
+    print("----- finished publishing at {}".format(time.asctime()));
     #print("-----")
     #print("MQTT pub: " + json.dumps(param))
     print("+++++ wait for next polling interval")
