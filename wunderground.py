@@ -12,6 +12,7 @@ import urllib.parse
 import paho.mqtt.client as mqtt
 import math
 import wxFormula
+from secret import *
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
@@ -21,7 +22,7 @@ BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweather
 PUBLISHING_INTERVAL = 120   # publish every X seconds
 
 WUNDERGROUND_ID = 'KOKNORMA6'  # station ID
-WUNDERGROUND_PASSWORD = '78ce9f30'
+#WUNDERGROUND_PASSWORD = secret.WUNDERGROUND_PASSWORD
 
 current = {}  # create empty dictionary of current observations
 
@@ -150,6 +151,7 @@ def main():
             print("URLError: {}".format(e))
         except:
             print("some other bizzare error")
+            #raise
 
         time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
         timer = time.time()

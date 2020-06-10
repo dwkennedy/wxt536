@@ -13,6 +13,7 @@ import paho.mqtt.client as mqtt
 import math
 import wxFormula
 import requests
+from secret import *
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
@@ -21,7 +22,7 @@ BASE_URL = "http://www.pwsweather.com/pwsupdate/pwsupdate.php"
 PUBLISHING_INTERVAL = 120   # publish every X seconds
 
 PWSWEATHER_ID = 'WEATHERBOT'  # station ID
-PWSWEATHER_PASSWORD = 'wASrKMl1'
+#PWSWEATHER_PASSWORD = 'xxxxxxxx'
 
 current = {}  # create empty dictionary of current observations
 
