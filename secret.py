@@ -1,0 +1,4 @@
+#!/usr/bin/python3
+
+PWSWEATHER_PASSWORD = 'wASrKMl1'
+WUNDERGROUND_PASSWORD = '78ce9f30'
