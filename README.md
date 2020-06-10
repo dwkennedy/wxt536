@@ -9,6 +9,10 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     Accept commands to send to WXT-536 device on wxt/SERIAL_NUMBER/cmd
     set station altitude in this file
             
+### jsonListener.py
+    subscribe to wxt/SERIAL_NUMBER.  write all messages to json file.  open new files
+    every day at 00:00 UTC
+    
 ### jsonServer.py
     subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
     create http server on PORT_NUMBER and return observations as JSON
