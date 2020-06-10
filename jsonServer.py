@@ -21,8 +21,7 @@ BROKER_ADDRESS = '127.0.0.1'
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
 TIMEOUT = 20  # seconds before considering current data stale
 
-current = {'validFlag':0}
-current['valid'] = float("{:.1f}".format(time.time() - TIMEOUT))  # stale data to begin with
+current = {'valid': 0, 'time': 0}
 
 # this code creates the http server and dispatches commands that are received
 class httpHandler(BaseHTTPRequestHandler):
@@ -42,11 +41,11 @@ class httpHandler(BaseHTTPRequestHandler):
         s.send_header("Access-Control-Allow-Origin", "*")
         s.end_headers()
 
-        if ((time.time() - float(current['valid']))<TIMEOUT):
-           current['validFlag'] = 1;
+        if ((time.time() - float(current['time']))<TIMEOUT):
+           current['valid'] = 1;
            #print ("{} - {} = {}".format(time.time(),current['valid'],(time.time()-float(current['valid']))))
         else:
-           current['validFlag'] = 0;
+           current['valid'] = 0;
            #print ("{} - {} = {}".format(time.time(),current['valid'],(time.time()-float(current['valid']))))
       
         try:
@@ -61,21 +60,16 @@ class mqttHandler:
     # now we define the callbacks to handle messages we subcribed to
     def on_message(self, client, userdata, message):
         global current
-        #print("message received: {0}".format(message.payload.decode("utf-8")))
-        #print("message topic: {0}".format(message.topic))
+        #print("message topic: {}".format(message.topic))
+        #print("message received: {}".format(message.payload.decode("utf-8")))
         #print("message qos: {0}".format(message.qos))
         #print("message retain flag: {0}".format(message.retain))
-        # remove leading 'wxt/WXT_SERIAL'
-        components = message.topic.split('/')
-        try:
-           myKey = components[-1]
-        except:
-           print("Malformed message topic " + message.topic);
 
-        myValue = message.payload
-        current[myKey] = json.loads(myValue);
-        current['valid'] = float("{:.1f}".format(time.time()))
-        #print('MQTT: {}: {}'.format(myKey,myValue))
+        try:
+            current = json.loads(message.payload.decode('utf-8'))
+            #print(json.dumps(current))
+        except:
+            print("Failed decoding json")
 
     def __init__(self):
 
@@ -85,7 +79,7 @@ class mqttHandler:
       client.on_message = self.on_message
       client.connect(BROKER_ADDRESS)
       client.loop_start()
-      client.subscribe('wxt/{}/#'.format(WXT_SERIAL))
+      client.subscribe('wxt/{}'.format(WXT_SERIAL))
 
 def main():
     global current

@@ -125,7 +125,7 @@ while True:
     print("----- sending 0R command");
     s.send(u'0R\r\n'.encode())  # send command to return all sentences
     print("+++++ reading sentences");
-    timer = time.time()  # reset timer
+    param = {'time': int(time.time())} # reset timer
     for index in range(4):  # read four lines of response (0R1,0R2,0R3,0R5)
        try:
           line=file.readline().decode('ISO-8859-1')
@@ -140,39 +140,36 @@ while True:
             (label, content) = chunk.split('=',1)
             value = content[:-1]
             unit = content[-1]
+            param[label] = {'value': value, 'unit': unit}
           except:
             print("bad chunk: " + chunk)
             break
-          try:    
-            param[label] = {'value': value, 'unit': unit, 'time': timer}
-            mqttString = 'wxt/{}/{}'.format(WXT_SERIAL,label) + ' {"value": "%s", "unit": "%s", "timestamp": "%.1f"}' % (value,unit,timer)
-            client.publish('wxt/{}/{}'.format(WXT_SERIAL,label), '{"value": "%s", "unit": "%s", "timestamp": "%.1f"}' % (value,unit,timer))
-            print("MQTT pub: {}".format(mqttString))
-          except:
-            print("bad value/unit %s/%s" % (value,unit))
 
     # compute and publish derived parameters
     print("----- derived parameters")
     try:
-       # compute dewpoint from measured temp and RH
-       dewpt = wxFormula.dewpoint(float(param['Ta']['value']), float(param['Ua']['value']))
-       client.publish('wxt/{}/{}'.format(WXT_SERIAL,'Td'), '{"value": "%.1f", "unit": "%s", "timestamp": "%.1f"}' % (dewpt,'C',timer))
-       mqttString = 'wxt/{}/{}'.format(WXT_SERIAL,'Td') + ' {"value": "%.1f", "unit": "%s", "timestamp": "%.1f"}' % (dewpt,'C',timer)
-       print("MQTT pub: {}".format(mqttString))
+        # compute dewpoint from measured temp and RH
+        dewpt = wxFormula.dewpoint(float(param['Ta']['value']), float(param['Ua']['value']))
+        dewpt = float(int(dewpt*10))/10
+        param['Td'] = {'value': dewpt, 'unit': 'C'}
     except:
-       print("error computing dewpoint")
+        print("error computing dewpoint")
     try:
-       # compute MSL pressure from station elevation and station pressure
-       MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
-       client.publish('wxt/{}/{}'.format(WXT_SERIAL,'Pb'), '{"value": "%.1f", "unit": "%s", "timestamp": "%.1f"}' % (MSLPressure,param['Pa']['unit'],timer))
-       mqttString = 'wxt/{}/{}'.format(WXT_SERIAL,'Pb') + ' {"value": "%.1f", "unit": "%s", "timestamp": "%.1f"}' % (MSLPressure,param['Pa']['unit'],timer)
-       print("MQTT pub: {}".format(mqttString))
+        # compute MSL pressure from station elevation and station pressure
+        MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
+        MSLPressure = float(int(MSLPressure*10))/10
+        param['Pb'] = {'value': MSLPressure, 'unit': 'H'}
     except:
-       print("error computing MSL pressure")
+        print("error computing MSL pressure")
+
+    try:    
+        mqttString = 'wxt/{} {}'.format(WXT_SERIAL, json.dumps(param))
+        print("MQTT pub: {}".format(mqttString))
+        client.publish('wxt/{}'.format(WXT_SERIAL), json.dumps(param))
+    except:
+        print("MQTT pub: failure") 
 
     print("----- finished publishing at {}".format(time.asctime()));
-    #print("-----")
-    #print("MQTT pub: " + json.dumps(param))
     print("+++++ wait for next polling interval")
 
         

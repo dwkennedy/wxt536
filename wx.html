@@ -15,6 +15,7 @@ body {
 	background-color: lightblue;
 	padding: 10px;
 	width: 700px;
+	margin: auto;
 }
 
 .grid-container > div {
@@ -229,7 +230,7 @@ function updateWXT(arr, units) {
    document.getElementById("windDirAveData").innerHTML = arr.Dm.value;
    document.getElementById("rainDurData").innerHTML = arr.Rd.value;
    document.getElementById("hailDurData").innerHTML = arr.Hd.value;
-   if (arr.validFlag > 0) {
+   if (arr.valid) {
       document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
    } else {
       document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";

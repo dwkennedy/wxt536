@@ -101,20 +101,16 @@ class mqttHandler:
     # now we define the callbacks to handle messages we subcribed to
     def on_message(self, client, userdata, message):
         global current
-        #print("message received: {0}".format(message.payload))
-        #print("message topic: {0}".format(message.topic))
+        #print("message topic: {}".format(message.topic))
+        #print("message received: {}".format(message.payload.decode("utf-8")))
         #print("message qos: {0}".format(message.qos))
         #print("message retain flag: {0}".format(message.retain))
-        # remove leading 'wxt/'
-        components = message.topic.split('/')
-        try:
-           myKey = components[-1]
-        except:
-           print("Malformed message topic " + message.topic);
 
-        myValue = message.payload.decode('utf-8')
-        #print('MQTT: {}: {}'.format(myKey,myValue))
-        current[myKey] = json.loads(myValue);
+        try:
+            current = json.loads(message.payload.decode('utf-8'))
+            #print(json.dumps(current))
+        except:
+            print("Failed decoding json")
 
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
@@ -123,7 +119,7 @@ class mqttHandler:
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
         client.loop_start()
-        client.subscribe('wxt/{}/#'.format(WXT_SERIAL))
+        client.subscribe('wxt/{}'.format(WXT_SERIAL))
 
 
 def main():
