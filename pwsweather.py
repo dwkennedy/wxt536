@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # this server subscribes to mqtt server and retains the last value of each message to serve
-#  upload data to wunderground every minute
+#  upload data to pwsweather every PUBLISHING_INTERVAL seconds
 
 import time
 import json
@@ -12,21 +12,22 @@ import urllib.parse
 import paho.mqtt.client as mqtt
 import math
 import wxFormula
+import requests
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
-BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
-# optional for realtime update
-#BASE_URL = "https://rtupdate.wunderground.com/weatherstation/updateweatherstation.php?"
+#BASE_URL = "http://www.pwsweather.com/pwsupdate/pwsupdate.php?"
+BASE_URL = "http://www.pwsweather.com/pwsupdate/pwsupdate.php"
 PUBLISHING_INTERVAL = 120   # publish every X seconds
 
-WUNDERGROUND_ID = 'KOKNORMA6'  # station ID
-WUNDERGROUND_PASSWORD = '78ce9f30'
+PWSWEATHER_ID = 'WEATHERBOT'  # station ID
+PWSWEATHER_PASSWORD = 'wASrKMl1'
 
 current = {}  # create empty dictionary of current observations
 
-# documentation for wunderground PWS update
-# https://support.weather.com/s/article/PWS-Upload-Protocol?language=en_US
+# documentation for PWSweather update
+# GET: https://github.com/cmcginty/PyWeather/blob/master/weather/services/pws.py
+# POST: https://github.com/johnny2678/wupws/blob/master/wu-pws.sh
 
 def C2F(C):
     return(((float(C)*9)/5)+32)
@@ -40,9 +41,59 @@ def mm2in(mm):
 def mbar2inhg(mbar):
     return(float(mbar)*0.02952998)
 
+# this code executes the POST request to PWSweather
+def createPOST(wxt):
+    # set to missing values
+    action = 'updateraw'
+    #dateutc = 'now'
+    #dateutc = urllib.parse.quote_plus(time.strftime("%Y-%m-%d %H:%M:%S",time.gmtime()))
+    dateutc = time.strftime("%Y-%m-%d %H:%M:%S",time.gmtime())
+    winddir_avg2m = 0 # 'Dm'
+    windspeedmph_avg2m = ms2mph(0) # 'Sm'  # convert from m/s to mph
+    windgustmph = ms2mph(0)  # 'Sx'  # convert from m/s to mph
+    windgustdir = 0  # 'Dx'
+    humidity = 0  # 'Ua'
+    tempf = C2F(0)  #  'Ta'
+    baromin = mbar2inhg(0) # 'Pa'  # convert mbar to inHg
+    softwaretype = 'custom'
+    dailyrainin = mm2in(0)  # 'Rc', reset at midnight local time
+    rainin = mm2in(0)  # 'Ri', rain intensity in in/hr
+    try:
+        baromin = mbar2inhg(float(wxt['Pb']['value'])) 
+        dailyrainin = mm2in(float(wxt['Rc']['value']))
+        dewptf = C2F(float(wxt['Td']['value']))
+        humidity = float(wxt['Ua']['value'])
+        rainin = mm2in(float(wxt['Ri']['value']))
+        tempf = C2F(float(wxt['Ta']['value']))
+        winddir_avg2m = wxt['Dm']['value']
+        windgustmph = ms2mph(float(wxt['Sx']['value']))
+        windspeedmph_avg2m = ms2mph(float(wxt['Sm']['value']))
+        windgustdir = wxt['Dx']['value']
+    except KeyError:
+        print("Missing parameter. check WXT-536 configuration")
+        raise  # re-raise error so the caller knows we've failed
 
+    url = {}
+    url['action'] = action
+    url['ID'] = PWSWEATHER_ID
+    url['PASSWORD'] = PWSWEATHER_PASSWORD
+    url['dateutc'] = dateutc
+    url['winddir'] = winddir_avg2m
+    url['windspeedmph'] = "{:.2f}".format(windspeedmph_avg2m)
+    url['windgustmph'] = "{:.2f}".format(windgustmph)
+    url['windgustdir'] = windgustdir
+    url['humidity'] = "{:.1f}".format(humidity)
+    url['dewpt'] = "{:.1f}".format(dewptf)
+    url['tempf'] = "{:.2f}".format(tempf)
+    url['baromin'] = "{:.3f}".format(baromin)
+    url['dailyrainin'] = "{:.3f}".format(dailyrainin)
+    url['rainin'] = "{:.3f}".format(rainin)
+    url['softwaretype'] = softwaretype
 
-# this code creates the GET request to wunderground
+    print("{}: {}".format(time.asctime(), json.dumps(url)))
+    return(requests.post(BASE_URL, data = url))
+    
+# this code creates the GET request to PWSweather
 def createGET(wxt):
     # set to missing values
     action = 'updateraw'
@@ -57,33 +108,29 @@ def createGET(wxt):
     baromin = mbar2inhg(0) # 'Pa'  # convert mbar to inHg
     softwaretype = 'custom'
     dailyrainin = mm2in(0)  # 'Rc', reset at midnight local time
-    rainin = mm2in(0)  # 'Ri', rain intensity 
+    rainin = mm2in(0)  # 'Ri', rain intensity in in/hr
     try:
-        winddir_avg2m = wxt['Dm']['value']
-        windspeedmph_avg2m = ms2mph(float(wxt['Sm']['value']))
-        windgustdir = wxt['Dx']['value']
-        windgustmph = ms2mph(float(wxt['Sx']['value']))
-        tempc = float(wxt['Ta']['value'])
-        humidity = float(wxt['Ua']['value'])
-        dewptf = C2F(float(wxt['Td']['value']))
-        tempf = C2F(float(wxt['Ta']['value']))
         baromin = mbar2inhg(float(wxt['Pb']['value'])) 
         dailyrainin = mm2in(float(wxt['Rc']['value']))
+        dewptf = C2F(float(wxt['Td']['value']))
+        humidity = float(wxt['Ua']['value'])
         rainin = mm2in(float(wxt['Ri']['value']))
+        tempf = C2F(float(wxt['Ta']['value']))
+        winddir_avg2m = wxt['Dm']['value']
+        windgustmph = ms2mph(float(wxt['Sx']['value']))
+        windspeedmph_avg2m = ms2mph(float(wxt['Sm']['value']))
+        windgustdir = wxt['Dx']['value']
     except KeyError:
         print("Missing parameter. check WXT-536 configuration")
         raise  # re-raise error so the caller knows we've failed
 
     url = ''
     url += "action={}".format(action)
-    url += "&ID={}".format(WUNDERGROUND_ID)
-    url += "&PASSWORD={}".format(WUNDERGROUND_PASSWORD)
+    url += "&ID={}".format(PWSWEATHER_ID)
+    url += "&PASSWORD={}".format(PWSWEATHER_PASSWORD)
     url += "&dateutc={}".format(dateutc)
     url += "&winddir={}".format(winddir_avg2m)
     url += "&windspeedmph={:.2f}".format(windspeedmph_avg2m)
-    url += "&winddir_avg2m={}".format(winddir_avg2m)
-    url += "&windspeedmph_avg2m={:.2f}".format(windspeedmph_avg2m)
-    url += "&winddir_avg2m={}".format(winddir_avg2m)
     url += "&windgustmph={:.2f}".format(windgustmph)
     url += "&windgustdir={}".format(windgustdir)
     url += "&humidity={:.1f}".format(humidity)
@@ -93,8 +140,6 @@ def createGET(wxt):
     url += "&dailyrainin={:.3f}".format(dailyrainin)
     url += "&rainin={:.3f}".format(rainin)
     url += "&softwaretype={}".format(softwaretype)
-    # optional for realtime wunderground server
-    #url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
 
     return(BASE_URL + url)
 
@@ -118,7 +163,7 @@ class mqttHandler:
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
         print("{}: {}".format(time.asctime(), "init mqttHandler"))
-        client = mqtt.Client("wunderground")
+        client = mqtt.Client("pwsweather")
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
         client.loop_start()
@@ -133,16 +178,15 @@ def main():
     robot = mqttHandler()
 
     # send update every minute
-    print("{}: {}".format(time.asctime(), "Wunderground client starts"))
+    print("{}: {}".format(time.asctime(), "PWSweather client starts"))
     time.sleep(5.1)  # let first messages get published
     timer = time.time()
     
     while True:
         try:
-            url = createGET(current)
-            print("{}: {}".format(time.asctime(), url))
-            f = urllib.request.urlopen(str(url))
-            print("{}: {}".format(time.asctime(), f.read().strip().decode('utf-8')))
+            print("{}: {}".format(time.asctime(), "POST data to PSWstation.com"))
+            f = createPOST(current)
+            print("{}: {}".format(time.asctime(), re.sub(r'\n',' ',f.text)))
             current={}  # success publishing, clear current
         except KeyError:
             print('caught KeyError, missing parameter')
@@ -150,11 +194,12 @@ def main():
             print("URLError: {}".format(e))
         except:
             print("some other bizzare error")
+            #raise
 
         time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
         timer = time.time()
 
-    print("{}: {}".format(time.asctime(), "Wunderground client stops"))
+    print("{}: {}".format(time.asctime(), "PWSweather client stops"))
 
 
 # kick off server when the script is called
