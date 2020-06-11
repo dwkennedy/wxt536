@@ -130,7 +130,8 @@ client.subscribe('gps/{}'.format(WXT_SERIAL))  # subscribe to command channel
 time.sleep(1) # let gps load up a measurement
 while True:
     param = {}
-    line = '';
+    line = ''
+    skew = 0
     # wait for next time 
     sleepy = WXT_POLLING_INTERVAL - (float(current_gps['time']) % WXT_POLLING_INTERVAL)
     if sleepy > 0:
@@ -186,7 +187,10 @@ while True:
         print("error computing MSL pressure")
 
     # add some gps parameters
-    param['gps_time'] = current_gps['time']
+    param['gps_time'] = current_gps['gps_time']
+
+    skew = skew + abs(param['gps_time'] - param['time'])
+    print("GPS/WXT clock skew: {}".format(skew))
 
     try:    
         mqttString = 'wxt/{} {}'.format(WXT_SERIAL, json.dumps(param))
