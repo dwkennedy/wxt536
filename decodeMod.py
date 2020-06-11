@@ -62,19 +62,35 @@ WXT_SERIAL = 'N3720229' # PTU S/N N3620062
 WXT_ELEVATION = 375.0   # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
 
+current_gps = {'time':0}
+
 # now we define the callbacks to handle messages we subcribed to
-def on_message(client, userdata, message):
-    print("message received: {0}".format(str(message.payload.decode("utf-8"))))
+def on_message_wxt(client, userdata, message):
+    print("message received: {0}".format(str(message.payload.decode("ISO-8859-1"))))
     print("message topic: {0}".format(message.topic))
     print("message qos: {0}".format(message.qos))
     print("message retain flag: {0}".format(message.retain))
-    command = message.payload.decode('utf-8')
+    command = message.payload.decode('ISO-8859-1')
     print('{}: MQTT sub: {}: {}'.format(time.asctime(), message.topic, command))
     command += '\r\n'
     try:
-        s.send(command.encode())
+        s.send(command.encode('ISO-8859-1'))
     except:
         print("{}: MQTT command send to serial server failed".format(time.asctime()))
+
+def on_message_gps(client, userdata, message):
+    global current_gps
+
+    #print("message received: {0}".format(message.payload.decode("ISO-8859-1")))
+    #print("message topic: {0}".format(message.topic))
+    #print("message qos: {0}".format(message.qos))
+    #print("message retain flag: {0}".format(message.retain))
+    print('{}: MQTT sub: {}: {}'.format(time.asctime(), message.topic, message.payload.decode('ISO-8859-1')))
+    try:
+        current_gps = json.loads(message.payload.decode('ISO-8859-1'))
+    except:
+        print("{}: MQTT can't decode incoming gps message".format(time.asctime()))
+        raise
 
 class SocketIO(io.RawIOBase):
     def __init__(self, sock):
@@ -100,16 +116,23 @@ file = SocketIO(s)
 #file = open("test.out","r")
 
 client = mqtt.Client('pbx-wxt')
-client.on_message = on_message
+client.on_message = on_message_wxt
 client.connect(LOCAL_BROKER_ADDRESS)
 client.loop_start()
 client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))  # subscribe to command channel
 
+client = mqtt.Client('pbx-gps-client')
+client.on_message = on_message_gps
+client.connect(LOCAL_BROKER_ADDRESS)
+client.loop_start()
+client.subscribe('gps/{}'.format(WXT_SERIAL))  # subscribe to command channel
+
+time.sleep(1) # let gps load up a measurement
 while True:
     param = {}
     line = '';
     # wait for next time 
-    sleepy = WXT_POLLING_INTERVAL - (time.time() % WXT_POLLING_INTERVAL)
+    sleepy = WXT_POLLING_INTERVAL - (float(current_gps['time']) % WXT_POLLING_INTERVAL)
     if sleepy > 0:
         time.sleep(sleepy)  # wait WXT_POLLING_INTERVAL sec from time of last poll
     print("----- flushing socket at {}".format(time.asctime()));
@@ -161,6 +184,9 @@ while True:
         param['Pb'] = {'value': MSLPressure, 'unit': 'H'}
     except:
         print("error computing MSL pressure")
+
+    # add some gps parameters
+    param['gps_time'] = current_gps['time']
 
     try:    
         mqttString = 'wxt/{} {}'.format(WXT_SERIAL, json.dumps(param))
