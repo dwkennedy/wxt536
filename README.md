@@ -8,6 +8,9 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     Construct a JSON string and publish to q MQTT server, topic wxt/SERIAL_NUMBER
     Accept commands to send to WXT-536 device on wxt/SERIAL_NUMBER/cmd
     set station altitude in this file
+
+### ingestMetTower.py
+    read files of json met data, output to netCDF4 file
             
 ### jsonListener.py
     subscribe to wxt/SERIAL_NUMBER.  write all messages to json file.  open new files
@@ -35,3 +38,4 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
 
 ### wxt.settings:
     notes on how to configure wxt-536 for ASCII mode
+
