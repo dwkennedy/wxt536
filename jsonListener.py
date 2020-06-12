@@ -9,6 +9,7 @@ import json
 import paho.mqtt.client as mqtt
 #import metTower
 #from netCDF4 import Dataset
+import logging
 
 BROKER_ADDRESS = '127.0.0.1'
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
@@ -31,10 +32,10 @@ class mqttHandler:
 
         try:
             current = json.loads(message.payload.decode('utf-8'))
-            #print(json.dumps(current))
+            logging.debug(json.dumps(current))
         except:
-            print("Failed decoding json")
-            raise
+            logging.critical("failed decoding incoming json")
+            #raise
 
         #  check to see if netcdf file exists
         (tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday,tm_yday,tm_isdst)=time.gmtime(current['time'])
@@ -43,7 +44,7 @@ class mqttHandler:
            if (self.filename != ''):
               self.filehandle.close()
            self.filename = new_filename
-           print("opening new file {}".format(self.filename))
+           logging.info("opening/appending file {}".format(self.filename))
            self.filehandle = open(self.filename,'a')
  
         #  insert all the goodies into the netcdf file
@@ -59,7 +60,7 @@ class mqttHandler:
     def __init__(self):
 
       # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-      print ("init mqttHandler")
+      logging.info("init mqttHandler")
       client = mqtt.Client("netcdfListener")
       client.on_message = self.on_message
       client.connect(BROKER_ADDRESS)
@@ -69,18 +70,21 @@ class mqttHandler:
 def main():
     global current
 
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
     robot = mqttHandler()
 
-    print (time.asctime(), "json Listener Starts" )
+    logging.info("jsonListener.py starts")
     try:
         while True:
            time.sleep(60)  
     except KeyboardInterrupt:
         pass
 
-    print (time.asctime(), "json Listener Stops" )
+    logging.info("jsonListener.py stops")
 
 
 # kick off server when the script is called

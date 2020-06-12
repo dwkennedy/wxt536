@@ -139,16 +139,16 @@ def main():
     robot = mqttHandler()
 
     # send update every PUBLISHING_INTERVAL seconds
-    logging.info("{}: {}".format(time.asctime(), "Wunderground client starts"))
+    logging.info("wunderground.py client starts")
     time.sleep(5.1)  # let first messages get published
     
     while True:
         try:
             last_time = time.time()
             url = createGET(current)
-            logging.info("{}: {}".format(time.asctime(), url))
+            logging.info(url)
             f = urllib.request.urlopen(str(url))
-            logging.info("{}: {}".format(time.asctime(), f.read().strip().decode('utf-8')))
+            logging.info(f.read().strip().decode('utf-8'))
             current={}  # success publishing, clear current
         except KeyError:
             logging.warning('missing parameter in wxt message: {}'.format(json.dumps(wxt)))
@@ -163,10 +163,10 @@ def main():
             time.sleep(sleep_time)
         else:
             # i think this could happen if there was a big delay in publishing (>PUBLISHING_INTERVAL secs)
-            logging.critical("{}: How did I get a negative sleep_time? time.time(): {} last_time:{} sleep_time: {}".format(time.asctime(),time.time(),last_time,sleep_time))
+            logging.critical("How did I get a negative sleep_time? time.time(): {} last_time:{} sleep_time: {}".format(time.time(),last_time,sleep_time))
             break
      
-    logging.info("{}: {}".format(time.asctime(), "Wunderground client stops"))
+    logging.info("wunderground.py client stops")
 
 # kick off server when the script is called
 if __name__ == '__main__':

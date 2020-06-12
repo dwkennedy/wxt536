@@ -14,6 +14,7 @@ import json
 import re
 #from urllib.parse import unquote
 import paho.mqtt.client as mqtt
+import logging
 
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 4444
@@ -49,10 +50,10 @@ class httpHandler(BaseHTTPRequestHandler):
            #print ("{} - {} = {}".format(time.time(),current['valid'],(time.time()-float(current['valid']))))
       
         try:
-           print("{}: {}".format(time.asctime(),json.dumps(current)))
+           logging.debug(json.dumps(current))
            s.wfile.write(json.dumps(current).encode('utf-8'))
         except:
-           print("something broke in httpHandler!")
+           logging.critical("something broke in httpHandler!")
 
 #  get data from current dictionary and return values as JSON
 class mqttHandler:
@@ -67,14 +68,14 @@ class mqttHandler:
 
         try:
             current = json.loads(message.payload.decode('utf-8'))
-            #print(json.dumps(current))
+            logging.debug(json.dumps(current))
         except:
             print("Failed decoding json")
 
     def __init__(self):
 
       # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-      print ("init mqttHandler")
+      logging.info("init mqttHandler")
       client = mqtt.Client("jsonServer")
       client.on_message = self.on_message
       client.connect(BROKER_ADDRESS)
@@ -84,19 +85,22 @@ class mqttHandler:
 def main():
     global current
 
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
     robot = mqttHandler()
 
     # start http server and listen for requests
     httpd = HTTPServer((HOST_NAME, PORT_NUMBER), httpHandler)
-    print (time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    logging.info("jsonServer.py starts - %s:%s" % (HOST_NAME, PORT_NUMBER))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
     httpd.server_close()
-    print (time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER))
+    logging.info("jsonServer.py stops - %s:%s" % (HOST_NAME, PORT_NUMBER))
 
 
 # kick off server when the script is called
