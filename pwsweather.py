@@ -164,7 +164,7 @@ class mqttHandler:
 
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-        logging.info("init mqttHandler")
+        logging.info("registering mqttHandler")
         client = mqtt.Client("pwsweather")
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
@@ -179,19 +179,19 @@ def main():
 
     FORMAT = '%(asctime)s %(levelname)s: %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+    logging.info("pwsweather.py client starts")
 
     robot = mqttHandler()
 
-    # send update every minute
-    logging.info("PWSweather client starts")
-    time.sleep(5.1)  # let first messages get published
-    timer = time.time()
+    time.sleep(5.1)  # let first wxt message get published
     
+    # send update every PUBLISHING_INTERVAL seconds
     while True:
         try:
-            logging.info("POST data to PSWstation.com")
+            timer = time.time()
+            logging.info("sending POST request")
             f = createPOST(current)
-            logging.info(re.sub(r'\n',' ',f.text))
+            logging.info("reply: {}".format(re.sub(r'\n',' ',f.text)))
             current={}  # success publishing, clear current
         except KeyError:
             logging.warning('caught KeyError, missing parameter')
@@ -201,10 +201,11 @@ def main():
             logging.critical("some other bizzare error")
             #raise
 
-        time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
-        timer = time.time()
+        sleepy = PUBLISHING_INTERVAL-(time.time()-timer)
+        if(sleepy>0):
+           time.sleep(sleepy)
 
-    logging.info("PWSweather client stops")
+    logging.info("pwsweather.py client stops")
 
 
 # kick off server when the script is called
