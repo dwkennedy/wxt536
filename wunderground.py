@@ -119,7 +119,7 @@ class mqttHandler:
 
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-        logging.info("starting mqttHandler")
+        logging.info("registering mqttHandler")
         client = mqtt.Client("wunderground")
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
@@ -133,22 +133,22 @@ def main():
     FORMAT = '%(asctime)s %(levelname)s: %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
 
+    logging.info("wunderground.py client starts")
+
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
-
     robot = mqttHandler()
 
-    # send update every PUBLISHING_INTERVAL seconds
-    logging.info("wunderground.py client starts")
     time.sleep(5.1)  # let first messages get published
     
+    # send update every PUBLISHING_INTERVAL seconds
     while True:
         try:
             last_time = time.time()
             url = createGET(current)
-            logging.info(url)
+            logging.info("sending GET request: {}".format(url))
             f = urllib.request.urlopen(str(url))
-            logging.info(f.read().strip().decode('utf-8'))
+            logging.info("reply: {}".format(f.read().strip().decode('utf-8')))
             current={}  # success publishing, clear current
         except KeyError:
             logging.warning('missing parameter in wxt message: {}'.format(json.dumps(wxt)))
