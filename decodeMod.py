@@ -63,6 +63,7 @@ WXT_ELEVATION = 375.0   # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
 
 current_gps = {'time':0}
+prior_gps_time = 0
 
 # now we define the callbacks to handle messages we subcribed to
 def on_message_wxt(client, userdata, message):
@@ -85,9 +86,10 @@ def on_message_gps(client, userdata, message):
     #print("message topic: {0}".format(message.topic))
     #print("message qos: {0}".format(message.qos))
     #print("message retain flag: {0}".format(message.retain))
-    print('{}: MQTT sub: {}: {}'.format(time.asctime(), message.topic, message.payload.decode('ISO-8859-1')))
+    #print('{}: MQTT sub: {}: {}'.format(time.asctime(), message.topic, message.payload.decode('ISO-8859-1')))
     try:
         current_gps = json.loads(message.payload.decode('ISO-8859-1'))
+        #current_gps['time'] = time.time()  #  pc clock arrival time of new gps string
     except:
         print("{}: MQTT can't decode incoming gps message".format(time.asctime()))
         raise
@@ -127,15 +129,35 @@ client.connect(LOCAL_BROKER_ADDRESS)
 client.loop_start()
 client.subscribe('gps/{}'.format(WXT_SERIAL))  # subscribe to command channel
 
+gps_timeout = time.time()
+current_gps['gps_time'] = gps_timeout
 time.sleep(1) # let gps load up a measurement
+
 while True:
     param = {}
     line = ''
-    skew = 0
-    # wait for next time 
-    sleepy = WXT_POLLING_INTERVAL - (float(current_gps['time']) % WXT_POLLING_INTERVAL)
-    if sleepy > 0:
-        time.sleep(sleepy)  # wait WXT_POLLING_INTERVAL sec from time of last poll
+
+    current_gps_time = current_gps['time']
+    if(current_gps_time > prior_gps_time):
+        prior_gps_time = current_gps_time
+        gps_timeout = time.time()  # new gps seen, reset timeout
+        if( (WXT_POLLING_INTERVAL - (current_gps_time % WXT_POLLING_INTERVAL)) > 1):  # is it time?
+           #print ("SLEEPING *******************************")
+           time.sleep(0.1)  #no, sleep 100ms and try again
+           continue
+        else:
+           #print ("FINAL SLEEPING *************************")
+           time.sleep( (WXT_POLLING_INTERVAL - (current_gps_time % WXT_POLLING_INTERVAL))) # it's time!
+    else:  # check timeout
+        if((time.time() - gps_timeout) > 2.5):  # new gps not seen, has it been too long?
+            sleepy = WXT_POLLING_INTERVAL - (time.time() % WXT_POLLING_INTERVAL) # trigger on pc clock
+            print("SLEEPY {} **********************************".format(sleepy))
+            time.sleep(sleepy)
+        else:
+           time.sleep(0.1)  #no, sleep 50ms and try again
+           #print ("LOOK FOR GPS *******************************")
+           continue
+
     print("----- flushing socket at {}".format(time.asctime()));
     s.setblocking(False)
     while True:
@@ -149,7 +171,7 @@ while True:
     print("----- sending 0R command");
     s.send(u'0R\r\n'.encode())  # send command to return all sentences
     print("+++++ reading sentences");
-    param = {'time': int(time.time())} # reset timer
+    param = {'time': int(time.time())} # reset params; timer marks when poll sent
     for index in range(4):  # read four lines of response (0R1,0R2,0R3,0R5)
        try:
           line=file.readline().decode('ISO-8859-1')
@@ -189,9 +211,6 @@ while True:
     # add some gps parameters
     param['gps_time'] = current_gps['gps_time']
 
-    skew = skew + abs(param['gps_time'] - param['time'])
-    print("GPS/WXT clock skew: {}".format(skew))
-
     try:    
         mqttString = 'wxt/{} {}'.format(WXT_SERIAL, json.dumps(param))
         print("MQTT pub: {}".format(mqttString))
@@ -201,5 +220,5 @@ while True:
 
     print("----- finished publishing at {}".format(time.asctime()));
     print("+++++ wait for next polling interval")
+ 
 
-        
