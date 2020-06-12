@@ -213,6 +213,19 @@ while True:
 
     # add some gps parameters
     param['gps_time'] = current_gps['gps_time']
+    param['lat'] = current_gps['lat']
+    param['lon'] = current_gps['lon']
+    param['alt_msl'] = current_gps['alt_msl']
+    param['geo_sep'] = current_gps['geo_sep']
+    param['spd_kts'] = current_gps['spd_kts']
+    param['course'] = current_gps['course']
+    param['pitch'] = current_gps['lat']
+    param['roll'] = current_gps['roll']
+    param['mag_heading'] = current_gps['mag_heading']
+    param['true_heading'] = current_gps['true_heading']
+    param['internal_pres'] = current_gps['internal_pres']
+    param['internal_temp'] = current_gps['internal_temp']
+    param['declination'] = current_gps['declination']
 
     try:    
         mqttString = 'wxt/{} {}'.format(WXT_SERIAL, json.dumps(param))
