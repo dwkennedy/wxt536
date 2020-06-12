@@ -13,6 +13,7 @@ import paho.mqtt.client as mqtt
 import math
 import wxFormula
 from secret import *
+import logging
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
@@ -72,7 +73,7 @@ def createGET(wxt):
         dailyrainin = mm2in(float(wxt['Rc']['value']))
         rainin = mm2in(float(wxt['Ri']['value']))
     except KeyError:
-        print("Missing parameter. check WXT-536 configuration")
+        logging.warning("Missing parameter. check WXT-536 configuration")
         raise  # re-raise error so the caller knows we've failed
 
     url = ''
@@ -112,13 +113,13 @@ class mqttHandler:
 
         try:
             current = json.loads(message.payload.decode('utf-8'))
-            #print(json.dumps(current))
+            logging.debug(json.dumps(current))
         except:
-            print("Failed decoding json")
+            logging.warning("wunderground.py failed decoding WXT json")
 
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-        print("{}: {}".format(time.asctime(), "init mqttHandler"))
+        logging.info("starting mqttHandler")
         client = mqtt.Client("wunderground")
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
@@ -128,36 +129,44 @@ class mqttHandler:
 
 def main():
     global current
+
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
 
     robot = mqttHandler()
 
-    # send update every minute
-    print("{}: {}".format(time.asctime(), "Wunderground client starts"))
+    # send update every PUBLISHING_INTERVAL seconds
+    logging.info("{}: {}".format(time.asctime(), "Wunderground client starts"))
     time.sleep(5.1)  # let first messages get published
-    timer = time.time()
     
     while True:
         try:
+            last_time = time.time()
             url = createGET(current)
-            print("{}: {}".format(time.asctime(), url))
+            logging.info("{}: {}".format(time.asctime(), url))
             f = urllib.request.urlopen(str(url))
-            print("{}: {}".format(time.asctime(), f.read().strip().decode('utf-8')))
+            logging.info("{}: {}".format(time.asctime(), f.read().strip().decode('utf-8')))
             current={}  # success publishing, clear current
         except KeyError:
-            print('caught KeyError, missing parameter')
+            logging.warning('missing parameter in wxt message: {}'.format(json.dumps(wxt)))
         except urllib.error.URLError as e:
-            print("URLError: {}".format(e))
+            logging.warning("URLError: {}".format(e))
         except:
-            print("some other bizzare error")
+            logging.critical("bizzare error: {}".format(e))
             #raise
 
-        time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
-        timer = time.time()
-
-    print("{}: {}".format(time.asctime(), "Wunderground client stops"))
-
+        sleep_time = PUBLISHING_INTERVAL-(time.time()-last_time)
+        if(sleep_time > 0):
+            time.sleep(sleep_time)
+        else:
+            # i think this could happen if there was a big delay in publishing (>PUBLISHING_INTERVAL secs)
+            logging.critical("{}: How did I get a negative sleep_time? time.time(): {} last_time:{} sleep_time: {}".format(time.asctime(),time.time(),last_time,sleep_time))
+            break
+     
+    logging.info("{}: {}".format(time.asctime(), "Wunderground client stops"))
 
 # kick off server when the script is called
 if __name__ == '__main__':
