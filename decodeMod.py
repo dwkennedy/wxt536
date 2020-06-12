@@ -219,7 +219,7 @@ while True:
     param['geo_sep'] = current_gps['geo_sep']
     param['spd_kts'] = current_gps['spd_kts']
     param['course'] = current_gps['course']
-    param['pitch'] = current_gps['lat']
+    param['pitch'] = current_gps['pitch']
     param['roll'] = current_gps['roll']
     param['mag_heading'] = current_gps['mag_heading']
     param['true_heading'] = current_gps['true_heading']
