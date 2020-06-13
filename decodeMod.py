@@ -217,8 +217,11 @@ while True:
         print("error computing dewpoint")
     try:
         # compute MSL pressure from station elevation and station pressure
-        MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
-        MSLPressure = float(int(MSLPressure*10))/10
+        if(USE_GPS):
+            MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(current_gps['alt_msl']))
+        else:
+            MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
+        MSLPressure = float(int(MSLPressure*100))/100
         param['Pb'] = {'value': MSLPressure, 'unit': 'H'}
     except:
         print("error computing MSL pressure")

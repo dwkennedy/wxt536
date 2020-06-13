@@ -7,7 +7,8 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     Compute MSL pressure from station pressure and altitude
     Construct a JSON string and publish to q MQTT server, topic wxt/SERIAL_NUMBER
     Accept commands to send to WXT-536 device on wxt/SERIAL_NUMBER/cmd
-    set station altitude in this file
+    set station altitude in this file. Added code to read GPS messages and merge
+    before publishing. WXT polling is controlled by GPS clock, /gps/SERIAL_NUMBER
 
 ### ingestMetTower.py
     read files of json met data, output to netCDF4 file
