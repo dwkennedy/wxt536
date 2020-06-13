@@ -96,13 +96,6 @@ def on_message_gps(client, userdata, message):
         logging.warning("MQTT: can't decode incoming gps message: %s",e)
         #raise
 
-# function to convert string to float.  returns 'None' if the float conversion fails
-def careful_float(string):
-    try:
-        return(float(string))
-    except:
-        return(None)
-
 class SocketIO(io.RawIOBase):
     def __init__(self, sock):
         self.sock = sock
@@ -214,6 +207,27 @@ while True:
             logging.debug("bad chunk: %s", chunk)
             break
 
+    # validate each parameter, convert to float
+    param['Ta']['value'] = wxFormula.safe_float(param['Ta']['value'] )
+    param['Pa']['value'] = wxFormula.safe_float(param['Pa']['value'] )
+    param['Ua']['value'] = wxFormula.safe_float(param['Ua']['value'] )
+    param['Sx']['value'] = wxFormula.safe_float(param['Sx']['value'] )
+    param['Sm']['value'] = wxFormula.safe_float(param['Sm']['value'] )
+    param['Sn']['value'] = wxFormula.safe_float(param['Sn']['value'] )
+    param['Dx']['value'] = wxFormula.safe_int(param['Dx']['value'] )
+    param['Dm']['value'] = wxFormula.safe_int(param['Dm']['value'] )
+    param['Dn']['value'] = wxFormula.safe_int(param['Dn']['value'] )
+    param['Rc']['value'] = wxFormula.safe_float(param['Rc']['value'] )
+    param['Ri']['value'] = wxFormula.safe_float(param['Ri']['value'] )
+    param['Rd']['value'] = wxFormula.safe_int(param['Rd']['value'] )
+    param['Hc']['value'] = wxFormula.safe_float(param['Hc']['value'] )
+    param['Hd']['value'] = wxFormula.safe_int(param['Hd']['value'] )
+    param['Hi']['value'] = wxFormula.safe_float(param['Hi']['value'] )
+    param['Th']['value'] = wxFormula.safe_float(param['Th']['value'] )
+    param['Vh']['value'] = wxFormula.safe_float(param['Vh']['value'] )
+    param['Vs']['value'] = wxFormula.safe_float(param['Vs']['value'] )
+    param['Vr']['value'] = wxFormula.safe_float(param['Vr']['value'] )
+
     # compute and publish derived parameters
     logging.debug("derived parameters")
     try:
@@ -225,13 +239,13 @@ while True:
         logging.warning("error computing dewpoint")
     try:
         # compute MSL pressure from station elevation and station pressure
-        MSLPressure = None
         if(USE_GPS):
             MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(current_gps['alt_msl']))
         else:
             MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
         MSLPressure = round(MSLPressure,2)
     except:
+        MSLPressure = None
         logging.warning("error computing MSL pressure")
 
     param['Pb'] = {'value': MSLPressure, 'unit': 'H'}

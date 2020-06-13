@@ -8,6 +8,20 @@ import math
 #   see: https://en.wikipedia.org/wiki/Barometric_formula
 #  also formula (3.2) from https://www.wmo.int/pages/prog/www/IMOP/meetings/SI/ET-Stand-1/Doc-10_Pressure-red.pdf
 
+# function to convert string to float.  returns 'None' if the float conversion fails
+def safe_float(string):
+    try:
+        return(float(string))
+    except:
+        return(None)
+
+# function to convert string to int.  returns 'None' if the int conversion fails
+def safe_int(string):
+    try:
+        return(int(string))
+    except:
+        return(None)
+
 def MSLP(staticPressure, height):
 
     P = staticPressure*100  # convert hPa to Pa
