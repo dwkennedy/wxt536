@@ -211,7 +211,7 @@ while True:
     try:
         # compute dewpoint from measured temp and RH
         dewpt = wxFormula.dewpoint(float(param['Ta']['value']), float(param['Ua']['value']))
-        dewpt = float(int(dewpt*10))/10
+        dewpt = round(dewpt,1)
         param['Td'] = {'value': dewpt, 'unit': 'C'}
     except:
         print("error computing dewpoint")
@@ -222,7 +222,7 @@ while True:
             MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(current_gps['alt_msl']))
         else:
             MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
-        MSLPressure = float(int(MSLPressure*100))/100
+        MSLPressure = round(MSLPressure,2)
     except:
         print("error computing MSL pressure")
 
