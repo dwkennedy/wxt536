@@ -189,7 +189,7 @@ def main():
     while True:
         try:
             timer = time.time()
-            logging.info("sending POST request")
+            logging.info("sending POST request: %s",json.dumps(current))
             f = createPOST(current)
             logging.info("reply: {}".format(re.sub(r'\n',' ',f.text)))
             current={}  # success publishing, clear current

@@ -69,34 +69,38 @@ def createGET(wxt):
         humidity = float(wxt['Ua']['value'])
         dewptf = C2F(float(wxt['Td']['value']))
         tempf = C2F(float(wxt['Ta']['value']))
-        baromin = mbar2inhg(float(wxt['Pb']['value'])) 
+        if (wxt['Pb']['value'] is not None):
+            baromin = mbar2inhg(float(wxt['Pb']['value'])) 
         dailyrainin = mm2in(float(wxt['Rc']['value']))
         rainin = mm2in(float(wxt['Ri']['value']))
-    except KeyError:
-        logging.warning("Missing parameter. check WXT-536 configuration")
-        raise  # re-raise error so the caller knows we've failed
 
-    url = ''
-    url += "action={}".format(action)
-    url += "&ID={}".format(WUNDERGROUND_ID)
-    url += "&PASSWORD={}".format(WUNDERGROUND_PASSWORD)
-    url += "&dateutc={}".format(dateutc)
-    url += "&winddir={}".format(winddir_avg2m)
-    url += "&windspeedmph={:.2f}".format(windspeedmph_avg2m)
-    url += "&winddir_avg2m={}".format(winddir_avg2m)
-    url += "&windspeedmph_avg2m={:.2f}".format(windspeedmph_avg2m)
-    url += "&winddir_avg2m={}".format(winddir_avg2m)
-    url += "&windgustmph={:.2f}".format(windgustmph)
-    url += "&windgustdir={}".format(windgustdir)
-    url += "&humidity={:.1f}".format(humidity)
-    url += "&dewptf={:.1f}".format(dewptf)
-    url += "&tempf={:.2f}".format(tempf)
-    url += "&baromin={:.3f}".format(baromin)
-    url += "&dailyrainin={:.3f}".format(dailyrainin)
-    url += "&rainin={:.3f}".format(rainin)
-    url += "&softwaretype={}".format(softwaretype)
-    # optional for realtime wunderground server
-    #url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
+        url = ''
+        url += "action={}".format(action)
+        url += "&ID={}".format(WUNDERGROUND_ID)
+        url += "&PASSWORD={}".format(WUNDERGROUND_PASSWORD)
+        url += "&dateutc={}".format(dateutc)
+        url += "&winddir={}".format(winddir_avg2m)
+        url += "&windspeedmph={:.2f}".format(windspeedmph_avg2m)
+        url += "&winddir_avg2m={}".format(winddir_avg2m)
+        url += "&windspeedmph_avg2m={:.2f}".format(windspeedmph_avg2m)
+        url += "&winddir_avg2m={}".format(winddir_avg2m)
+        url += "&windgustmph={:.2f}".format(windgustmph)
+        url += "&windgustdir={}".format(windgustdir)
+        url += "&humidity={:.1f}".format(humidity)
+        url += "&dewptf={:.1f}".format(dewptf)
+        url += "&tempf={:.2f}".format(tempf)
+        if(wxt['Pb']['value'] is not None):
+            url += "&baromin={:.3f}".format(baromin)
+        url += "&dailyrainin={:.3f}".format(dailyrainin)
+        url += "&rainin={:.3f}".format(rainin)
+        url += "&softwaretype={}".format(softwaretype)
+        # optional for realtime wunderground server
+        #url += "&realtime=1&rtfreq={}".format(PUBLISHING_INTERVAL)
+    
+    except KeyError:
+        url = ''
+        logging.warning("Missing parameter. check WXT-536 configuration")
+        #raise  # re-raise error so the caller knows we've failed
 
     return(BASE_URL + url)
 
@@ -154,7 +158,7 @@ def main():
             logging.warning('missing parameter in wxt message: {}'.format(json.dumps(wxt)))
         except urllib.error.URLError as e:
             logging.warning("URLError: {}".format(e))
-        except:
+        except Exception as e:
             logging.critical("bizzare error: {}".format(e))
             #raise
 
