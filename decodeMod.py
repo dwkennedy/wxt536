@@ -61,8 +61,8 @@ WXT_PORT = 2101           # The port used by the serial server
 WXT_SERIAL = 'N3720229'   # PTU S/N N3620062
 WXT_ELEVATION = 378.0     # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
-#USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
-USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+#USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
 
 # now we define the callbacks to handle messages we subcribed to
 
@@ -107,7 +107,7 @@ class SocketIO(io.RawIOBase):
         return False
 
 FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
 logging.info("decodeMod.py starts")
 
 while True:

@@ -54,6 +54,8 @@ class httpHandler(BaseHTTPRequestHandler):
            s.wfile.write(json.dumps(current).encode('utf-8'))
         except:
            logging.critical("something broke in httpHandler!")
+           raise
+
 
 #  get data from current dictionary and return values as JSON
 class mqttHandler:
@@ -87,6 +89,7 @@ def main():
 
     FORMAT = '%(asctime)s %(levelname)s: %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+    logging.info("jsonServer.py starts - %s:%s" % (HOST_NAME, PORT_NUMBER))
 
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
@@ -94,7 +97,6 @@ def main():
 
     # start http server and listen for requests
     httpd = HTTPServer((HOST_NAME, PORT_NUMBER), httpHandler)
-    logging.info("jsonServer.py starts - %s:%s" % (HOST_NAME, PORT_NUMBER))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
