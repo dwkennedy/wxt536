@@ -97,10 +97,13 @@ def main():
 
     # start http server and listen for requests
     httpd = HTTPServer((HOST_NAME, PORT_NUMBER), httpHandler)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
+
+    while True:
+        httpd.handle_request()
+    #try:
+    #    httpd.serve_forever()
+    #except KeyboardInterrupt:
+    #    pass
     httpd.server_close()
     logging.info("jsonServer.py stops - %s:%s" % (HOST_NAME, PORT_NUMBER))
 

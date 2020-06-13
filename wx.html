@@ -144,15 +144,17 @@ xmlhttpWXT.send();
 var url = new URL(window.location.href);
 var searchParams = new URLSearchParams(url.search);
 var units = searchParams.get('units');
+if (!units) { units = document.cookie; }
 
 xmlhttpWXT.onreadystatechange = function() {
-    document.getElementById("instrumentStatusData").innerHTML = "Foobar";
+    document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
     if (this.readyState == 0 ) {
         document.getElementById("instrumentStatusData").innerHTML = "Foobar";
     }
 
     if (this.readyState == 4 && this.status == 200) {
         var wxtArr = JSON.parse(this.responseText);
+        document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
         updateWXT(wxtArr, units);
 		/* document.getElementById("response").innerHTML = this.responseText; */
 		
@@ -165,12 +167,14 @@ function dewpoint(T, RH) {
 
 function metric() {
    units='met'
+   document.cookie='met';
    xmlhttpWXT.open("GET", urlWXT, true);
    xmlhttpWXT.send();
 }
 
 function imperial() {
    units='imp'
+   document.cookie='imp';
    xmlhttpWXT.open("GET", urlWXT, true);
    xmlhttpWXT.send();
 }
@@ -180,8 +184,8 @@ function updateWXT(arr, units) {
    var humidity = parseFloat(arr.Ua.value);
    var dewpt = dewpoint(temp,humidity);
    var pressure = parseFloat(arr.Pa.value);
-   var MSLPressure = MSLP(parseFloat(arr.Pa.value),376.7)
-   /* var MSLPressure = parseFloat(arr.Pb.value) */
+   /* var MSLPressure = MSLP(parseFloat(arr.Pa.value),376.7) */
+   var MSLPressure = parseFloat(arr.Pb.value)
    if (units=='imp') {
       document.getElementById("tempData").innerHTML = CtoF(temp).toFixed(1);
       document.getElementById("tempUnit").innerHTML = ' &#xB0;F';

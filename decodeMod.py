@@ -63,6 +63,9 @@ WXT_ELEVATION = 378.0     # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
 USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
 #USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+GPS_ANTENNA_OFFSET = -7.0 # height of gps antenna over pressure sensor; subtract from gps altitude
+                          # to find pressure sensor altitude (meters)
+                          # positive: gps antenna ABOVE pressure sensor
 
 # now we define the callbacks to handle messages we subcribed to
 
@@ -241,7 +244,7 @@ while True:
     try:
         # compute MSL pressure from station elevation and station pressure
         if(USE_GPS):
-            MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(current_gps['alt_msl']))
+            MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(current_gps['alt_egm2008'])-GPS_ANTENNA_OFFSET)
         else:
             MSLPressure = wxFormula.MSLP(float(param['Pa']['value']), float(WXT_ELEVATION))
         MSLPressure = round(MSLPressure,2)
@@ -257,7 +260,10 @@ while True:
         param['lat'] = current_gps['lat']
         param['lon'] = current_gps['lon']
         param['alt_msl'] = current_gps['alt_msl']
+        param['alt_egm2008'] = current_gps['alt_egm2008']
+        param['alt_wgs84'] = current_gps['alt_wgs84']
         param['geo_sep'] = current_gps['geo_sep']
+        param['geo_sep_egm2008'] = current_gps['geo_sep_egm2008']
         param['spd_kts'] = current_gps['spd_kts']
         param['course'] = current_gps['course']
         param['pitch'] = current_gps['pitch']
