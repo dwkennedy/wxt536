@@ -175,6 +175,7 @@ function updateWXT(arr, units) {
    var humidity = parseFloat(arr.Ua.value);
    var dewpt = dewpoint(temp,humidity);
    var pressure = parseFloat(arr.Pa.value);
+   var MSLPressure = parseFloat(arr.Pb.value);
    if (units=='imp') {
       document.getElementById("tempData").innerHTML = CtoF(temp).toFixed(1);
       document.getElementById("tempUnit").innerHTML = ' &#xB0;F';
@@ -182,7 +183,7 @@ function updateWXT(arr, units) {
       document.getElementById("dewpointUnit").innerHTML = ' &#xB0;F';
       document.getElementById("stationPressureUnit").innerHTML = ' inHg';
       document.getElementById("stationPressureData").innerHTML = mbar2inhg(pressure).toFixed(2);
-      document.getElementById("MSLPressureData").innerHTML = mbar2inhg(MSLP(pressure,375)).toFixed(2);
+      document.getElementById("MSLPressureData").innerHTML = mbar2inhg(MSLPressure).toFixed(2);
       document.getElementById("MSLPressureUnit").innerHTML = ' inHg';
       document.getElementById("windSpdMinData").innerHTML = ms2mph(arr.Sn.value).toFixed(1);
       document.getElementById("windSpdMaxData").innerHTML = ms2mph(arr.Sx.value).toFixed(1);
@@ -198,7 +199,6 @@ function updateWXT(arr, units) {
       document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
       document.getElementById("hailAmtUnit").innerHTML = 'hits/in<sup>2</sup>';
       document.getElementById("hailIntensityUnit").innerHTML = 'hits/in<sup>2</sup>h';
-
    } else {
       document.getElementById("tempUnit").innerHTML = ' &#xB0;C';
       document.getElementById("tempData").innerHTML = temp.toFixed(1);
@@ -206,7 +206,7 @@ function updateWXT(arr, units) {
       document.getElementById("dewpointUnit").innerHTML = ' &#xB0;C';
       document.getElementById("stationPressureData").innerHTML = pressure.toFixed(1);
       document.getElementById("stationPressureUnit").innerHTML = ' mbar';
-      document.getElementById("MSLPressureData").innerHTML = MSLP(pressure,375).toFixed(1);
+      document.getElementById("MSLPressureData").innerHTML = MSLPressure.toFixed(1);
       document.getElementById("MSLPressureUnit").innerHTML = ' mbar';
       document.getElementById("windSpdMinData").innerHTML = parseFloat(arr.Sn.value).toFixed(1);
       document.getElementById("windSpdMaxData").innerHTML = parseFloat(arr.Sx.value).toFixed(1);
@@ -222,7 +222,6 @@ function updateWXT(arr, units) {
       document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
       document.getElementById("hailAmtUnit").innerHTML = 'hits/mm<sup>2</sup>';
       document.getElementById("hailIntensityUnit").innerHTML = 'hits/mm<sup>2</sup>h';
-
    }
    document.getElementById("humidityData").innerHTML = humidity.toFixed(1);
    document.getElementById("windDirMinData").innerHTML = arr.Dn.value;

@@ -59,9 +59,10 @@ REMOTE_BROKER_ADDRESS = 'kennedy.tw'  # remote MQTT broker address
 WXT_HOST = '10.0.0.72'    # The WXT serial server hostname or IP address
 WXT_PORT = 2101           # The port used by the serial server
 WXT_SERIAL = 'N3720229'   # PTU S/N N3620062
-WXT_ELEVATION = 375.0     # WXT sensor elevation in meters above MSL
+WXT_ELEVATION = 378.0     # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
-USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+#USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
 
 # now we define the callbacks to handle messages we subcribed to
 
@@ -172,7 +173,7 @@ while True:
         sleepy = WXT_POLLING_INTERVAL - (time.time() % WXT_POLLING_INTERVAL)
         if(sleepy>0):
             time.sleep(sleepy)
-            log.debug("Sleeping for %s",sleepy)
+            logging.debug("Sleeping for %s",sleepy)
 
     logging.debug("flushing wxt input buffer")
     s.setblocking(False)
