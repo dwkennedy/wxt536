@@ -14,6 +14,7 @@ import math
 import wxFormula
 import requests
 from secret import *
+import logging
 
 BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
@@ -71,7 +72,7 @@ def createPOST(wxt):
         windspeedmph_avg2m = ms2mph(float(wxt['Sm']['value']))
         windgustdir = wxt['Dx']['value']
     except KeyError:
-        print("Missing parameter. check WXT-536 configuration")
+        logging.critical("Missing parameter. check WXT-536 configuration")
         raise  # re-raise error so the caller knows we've failed
 
     url = {}
@@ -91,7 +92,7 @@ def createPOST(wxt):
     url['rainin'] = "{:.3f}".format(rainin)
     url['softwaretype'] = softwaretype
 
-    print("{}: {}".format(time.asctime(), json.dumps(url)))
+    logging.debug(json.dumps(url))
     return(requests.post(BASE_URL, data = url))
     
 # this code creates the GET request to PWSweather
@@ -122,7 +123,7 @@ def createGET(wxt):
         windspeedmph_avg2m = ms2mph(float(wxt['Sm']['value']))
         windgustdir = wxt['Dx']['value']
     except KeyError:
-        print("Missing parameter. check WXT-536 configuration")
+        logging.critical("missing parameter. check WXT-536 configuration")
         raise  # re-raise error so the caller knows we've failed
 
     url = ''
@@ -157,13 +158,13 @@ class mqttHandler:
 
         try:
             current = json.loads(message.payload.decode('utf-8'))
-            #print(json.dumps(current))
+            logging.debug(json.dumps(current))
         except:
-            print("Failed decoding json")
+            logging.warning("failed decoding incoming mqtt json")
 
     def __init__(self):
         # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-        print("{}: {}".format(time.asctime(), "init mqttHandler"))
+        logging.info("registering mqttHandler")
         client = mqtt.Client("pwsweather")
         client.on_message = self.on_message
         client.connect(BROKER_ADDRESS)
@@ -176,31 +177,35 @@ def main():
     # fire up mqttHandler to pub/sub to topics
     # should use class factory to pass robot object to httpHandler
 
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+    logging.info("pwsweather.py client starts")
+
     robot = mqttHandler()
 
-    # send update every minute
-    print("{}: {}".format(time.asctime(), "PWSweather client starts"))
-    time.sleep(5.1)  # let first messages get published
-    timer = time.time()
+    time.sleep(5.1)  # let first wxt message get published
     
+    # send update every PUBLISHING_INTERVAL seconds
     while True:
         try:
-            print("{}: {}".format(time.asctime(), "POST data to PSWstation.com"))
+            timer = time.time()
+            logging.info("sending POST request")
             f = createPOST(current)
-            print("{}: {}".format(time.asctime(), re.sub(r'\n',' ',f.text)))
+            logging.info("reply: {}".format(re.sub(r'\n',' ',f.text)))
             current={}  # success publishing, clear current
         except KeyError:
-            print('caught KeyError, missing parameter')
+            logging.warning('caught KeyError, missing parameter')
         except urllib.error.URLError as e:
-            print("URLError: {}".format(e))
+            logging.warning("URLError: {}".format(e))
         except:
-            print("some other bizzare error")
+            logging.critical("some other bizzare error")
             #raise
 
-        time.sleep(PUBLISHING_INTERVAL-(time.time()-timer))
-        timer = time.time()
+        sleepy = PUBLISHING_INTERVAL-(time.time()-timer)
+        if(sleepy>0):
+           time.sleep(sleepy)
 
-    print("{}: {}".format(time.asctime(), "PWSweather client stops"))
+    logging.info("pwsweather.py client stops")
 
 
 # kick off server when the script is called
