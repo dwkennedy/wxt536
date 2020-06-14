@@ -20,6 +20,7 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
 ### jsonServer.py
     subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
     create http server on PORT_NUMBER and return observations as JSON
+    JSON shadow of mqtt data
                 
 ### pwsweather.py:
     subscribe to wxt/SERIAL_NUMBER
@@ -30,6 +31,9 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     subscribe to wxt/SERIAL_NUMBER
     publish observations to wunderground.com every PUBLISHING_INTERVAL seconds
     set wunderground ID and PASSWORD in this file
+
+### wxmobile.html
+    html/css/javascript for display of weather info.  gets data from jsonServer.py
                   
 ### wxFormula.py:
     all your favorite unit conversions, convert station pressure to MSL pressure, etc.
