@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<HTML lang="en">
+<HEAD>
+<META charset='utf-8'\>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<STYLE>
+body {
+  background-color: lightblue;
+}
+
+* {
+   box-sizing: border-box;
+}
+
+.grid-container {
+        width: 100%;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	display: grid;
+	grid-gap: 5px;
+	background-color: lightblue;
+	padding: 10px;
+	margin: auto;
+}
+
+@media only screen and (max-width : 699px) {
+
+.grid-container {
+	grid-template-columns: 50% 50%;
+        min-width: 360px;
+        max-width: 400px;
+}
+
+.temp { grid-area: 1/1/2/2;}
+.humidity { grid-area: 2/1/3/2;}
+.dewpoint { grid-area: 3/1/4/2;}
+.MSLPressure { grid-area: 4/1/5/2;}
+.rainAmt { grid-area: 5/1/6/2;}
+.rainDur { grid-area: 6/1/7/2;}
+.rainIntensity { grid-area: 7/1/8/2;}
+.instrumentStatus { grid-area: 8/1/9/2; }
+
+.windMin { grid-area: 1/2/2/3;}
+.windAve { grid-area: 2/2/3/3;}
+.windMax { grid-area: 3/2/4/3;}
+.stationPressure { grid-area: 4/2/5/3;}
+.hailAmt { grid-area: 5/2/6/3;}
+.hailDur { grid-area: 6/2/7/3;}
+.hailIntensity { grid-area: 7/2/8/3;}
+.displayUnits { grid-area: 8/2/9/3; }
+
+}
+
+@media only screen and (min-width : 700px) {
+
+.grid-container {
+	grid-template-columns: 25% 25% 25% 25%;
+	min-width: 700px;
+	max-width: 800px;
+}
+
+.temp { grid-area: 1/1/2/2;}
+.humidity { grid-area: 2/1/3/2;}
+.dewpoint { grid-area: 3/1/4/2;}
+.MSLPressure { grid-area: 4/1/5/2;}
+
+.windMin { grid-area: 1/2/2/3;}
+.windAve { grid-area: 2/2/3/3;}
+.windMax { grid-area: 3/2/4/3;}
+.stationPressure { grid-area: 4/2/5/3;}
+
+.rainAmt { grid-area: 1/3/2/4;}
+.rainDur { grid-area: 2/3/3/4;}
+.rainIntensity { grid-area: 3/3/4/4;}
+.instrumentStatus { grid-area: 4/3/5/4; }
+
+.hailAmt { grid-area: 1/4/2/5;}
+.hailDur { grid-area: 2/4/3/5;}
+.hailIntensity { grid-area: 3/4/4/5;}
+.displayUnits { grid-area: 4/4/5/5; }
+
+}
+
+.instrumentStatus {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-size: 20px;
+}
+
+.grid-container > div {
+	color: white;
+	background-color: darkblue;
+	padding: 10px;
+	font-size: 30px;
+}
+
+.button {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-size: 15px;
+	color: black;
+}
+
+.header {
+	font-size: 15px;
+	color: white;
+	text-align: left;
+}
+
+.data {
+	font-size: 25px;
+	color: yellow;
+	text-align: right;
+}
+
+.units {
+	font-size: 12px;
+	color: white;
+	text-align: right;
+}
+
+
+</style>
+
+<script>
+var xmlhttpWXT = new XMLHttpRequest();
+var urlWXT = "http://10.0.0.2:4444";
+xmlhttpWXT.open("GET", urlWXT, true);
+xmlhttpWXT.send();
+
+var url = new URL(window.location.href);
+var searchParams = new URLSearchParams(url.search);
+var units = searchParams.get('units');
+if (!units) { units = document.cookie; }
+
+xmlhttpWXT.onreadystatechange = function() {
+    document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
+    if (this.readyState == 0 ) {
+        document.getElementById("instrumentStatusData").innerHTML = "Barfoo";
+    }
+
+    if (this.readyState == 4 && this.status == 200) {
+        var wxtArr = JSON.parse(this.responseText);
+        document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
+        updateWXT(wxtArr, units);
+	/* document.getElementById("response").innerHTML = this.responseText; */
+		
+    }
+};
+
+function metric() {
+   units='met'
+   document.cookie='met';
+   xmlhttpWXT.open("GET", urlWXT, true);
+   xmlhttpWXT.send();
+}
+
+function imperial() {
+   units='imp'
+   document.cookie='imp';
+   xmlhttpWXT.open("GET", urlWXT, true);
+   xmlhttpWXT.send();
+}
+
+function updateWXT(arr, units) {
+   var temp = parseFloat(arr.Ta.value);
+   var humidity = parseFloat(arr.Ua.value);
+   var dewpt = parseFloat(arr.Td.value);
+   var pressure = parseFloat(arr.Pa.value);
+   /* var MSLPressure = MSLP(parseFloat(arr.Pa.value),376.7) */
+   var MSLPressure = parseFloat(arr.Pb.value)
+   if (units=='imp') {
+      document.getElementById("tempData").innerHTML = CtoF(temp).toFixed(1);
+      document.getElementById("tempUnit").innerHTML = ' &#xB0;F';
+      document.getElementById("dewpointData").innerHTML = CtoF(dewpt).toFixed(1);
+      document.getElementById("dewpointUnit").innerHTML = ' &#xB0;F';
+      document.getElementById("stationPressureUnit").innerHTML = ' inHg';
+      document.getElementById("stationPressureData").innerHTML = mbar2inhg(pressure).toFixed(2);
+      document.getElementById("MSLPressureData").innerHTML = mbar2inhg(MSLPressure).toFixed(2);
+      document.getElementById("MSLPressureUnit").innerHTML = ' inHg';
+      document.getElementById("windSpdMinData").innerHTML = ms2mph(arr.Sn.value).toFixed(1);
+      document.getElementById("windSpdMaxData").innerHTML = ms2mph(arr.Sx.value).toFixed(1);
+      document.getElementById("windSpdAveData").innerHTML = ms2mph(arr.Sm.value).toFixed(1);
+      document.getElementById("windMinUnit").innerHTML = '&nbsp;mph';
+      document.getElementById("windMaxUnit").innerHTML = '&nbsp;mph';
+      document.getElementById("windAveUnit").innerHTML = '&nbsp;mph';
+      document.getElementById("rainAmtData").innerHTML = mm2in(arr.Rc.value).toFixed(3);
+      document.getElementById("rainIntensityData").innerHTML = mm2in(arr.Ri.value).toFixed(3);
+      document.getElementById("rainAmtUnit").innerHTML = 'in';
+      document.getElementById("rainIntensityUnit").innerHTML = 'in/h';
+      document.getElementById("hailAmtData").innerHTML = arr.Hc.value;
+      document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
+      document.getElementById("hailAmtUnit").innerHTML = 'hits/in<sup>2</sup>';
+      document.getElementById("hailIntensityUnit").innerHTML = 'hits/in<sup>2</sup>h';
+   } else {
+      document.getElementById("tempUnit").innerHTML = ' &#xB0;C';
+      document.getElementById("tempData").innerHTML = temp.toFixed(1);
+      document.getElementById("dewpointData").innerHTML = dewpt.toFixed(1);
+      document.getElementById("dewpointUnit").innerHTML = ' &#xB0;C';
+      document.getElementById("stationPressureData").innerHTML = pressure.toFixed(1);
+      document.getElementById("stationPressureUnit").innerHTML = ' mbar';
+      document.getElementById("MSLPressureData").innerHTML = MSLPressure.toFixed(1);
+      document.getElementById("MSLPressureUnit").innerHTML = ' mbar';
+      document.getElementById("windSpdMinData").innerHTML = parseFloat(arr.Sn.value).toFixed(1);
+      document.getElementById("windSpdMaxData").innerHTML = parseFloat(arr.Sx.value).toFixed(1);
+      document.getElementById("windSpdAveData").innerHTML = parseFloat(arr.Sm.value).toFixed(1);
+      document.getElementById("windMaxUnit").innerHTML = '&nbsp;m/s';
+      document.getElementById("windMinUnit").innerHTML = '&nbsp;m/s';
+      document.getElementById("windAveUnit").innerHTML = '&nbsp;m/s';
+      document.getElementById("rainAmtData").innerHTML = parseFloat(arr.Rc.value).toFixed(2);
+      document.getElementById("rainIntensityData").innerHTML = parseFloat(arr.Ri.value).toFixed(2);
+      document.getElementById("rainAmtUnit").innerHTML = 'mm';
+      document.getElementById("rainIntensityUnit").innerHTML = 'mm/h';
+      document.getElementById("hailAmtData").innerHTML = arr.Hc.value;
+      document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
+      document.getElementById("hailAmtUnit").innerHTML = 'hits/mm<sup>2</sup>';
+      document.getElementById("hailIntensityUnit").innerHTML = 'hits/mm<sup>2</sup>h';
+   }
+   document.getElementById("humidityData").innerHTML = humidity.toFixed(1);
+   document.getElementById("windDirMinData").innerHTML = arr.Dn.value;
+   document.getElementById("windDirMaxData").innerHTML = arr.Dx.value;
+   document.getElementById("windDirAveData").innerHTML = arr.Dm.value;
+   document.getElementById("rainDurData").innerHTML = arr.Rd.value;
+   document.getElementById("hailDurData").innerHTML = arr.Hd.value;
+   if (arr.valid) {
+      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
+   } else {
+      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
+   }
+}
+
+function CtoF(temp) {
+	return((temp*9)/5+32.0);
+}
+
+function MSLP(staticPressure, height) {
+/* convert station pressure to mean sea level pressure given
+   static pressure at station (hPa or mbar) and height above sea level (m)
+   station temperature in C
+   see: https://en.wikipedia.org/wiki/Barometric_formula */
+
+    var P = staticPressure*100;  /* convert hPa to Pa */
+    var Tb = 288.15;     /* # standard temperature */
+    var Lb = -0.0065;    /* # standard temperature lapse rate (K/m) */
+    var hb = 0;          /* # height at bottom of layer b  */
+    var R = 8.3144598;   /* # universal gas constant, J/(mol*K) */
+    var g0 = 9.80665;    /* # gravitational acceleration, m/s^2 */
+    var M = 0.0289644;   /* # Molar mas of Earth's air, kg/mol */
+
+    var exponent = (g0*M)/(R*Lb);
+    var base = Tb/(Tb+Lb*(height-hb));
+    var Pb = P / Math.pow(base,exponent);
+    return (Pb/100);  /* # return pressure in hPa or mbar */
+}
+
+
+function ms2mph(ms) {
+    return(ms*2.236936);
+}
+
+function mm2in(mm) {
+    return(mm*0.03937008);
+}
+
+function mbar2inhg(mbar) {
+    return(mbar*0.02952998);
+}
+
+window.setInterval(function() {
+  xmlhttpWXT.open("GET", urlWXT, true);
+  xmlhttpWXT.send();
+}, 5000);
+
+</script>
+
+
+</HEAD>
+
+<BODY>
+
+<div class="grid-container">
+	<div class="temp">
+		<div class=header>Temperature</div>
+		<div class=data><span id=tempData>__._</span><span id=tempUnit class=units> &#xB0;F</span></div>
+	</div>
+	<div class="dewpoint">
+		<div class=header>Dewpoint</div>
+		<div class=data><span id=dewpointData>__._</span><span id=dewpointUnit class=units> &#xB0;F</span></div>
+	</div>
+	<div class="humidity">
+		<div class=header>Humidity</div>
+		<div class=data><span id=humidityData>__</span>&nbsp;<span class=units>% RH</span></div>
+	</div>
+	<div class="MSLPressure">
+		<div class=header>Pressure (MSLP)</div>
+		<div class=data><span id=MSLPressureData>___._</span><span id=MSLPressureUnit class=units> inHg</span></div>
+	</div>  
+	<div class="stationPressure">
+		<div class=header>Pressure (station)</div>
+		<div class=data><span id=stationPressureData>___._</span><span id=stationPressureUnit class=units> inHg</span></div>
+	</div>  
+	<div class="windMin">
+		<div class=header>Wind Minimum</div>
+		<div class=data><span id=windSpdMinData>_._</span><span id=windMinUnit class=units>&nbsp;mph</span> <span id=windDirMinData>___</span>&#xB0;</div>
+	</div>
+	<div class="windAve">
+		<div class=header>Wind Average</div>
+		<div class=data><span id=windSpdAveData>_._</span><span id=windAveUnit class=units>&nbsp;mph</span> <span id=windDirAveData>___</span>&#xB0;</div>
+	</div>
+	<div class="windMax">
+		<div class=header>Wind Maximum</div>
+		<div class=data><span id=windSpdMaxData>_._</span><span id=windMaxUnit class=units>&nbsp;mph</span> <span id=windDirMaxData>___</span>&#xB0;</div>
+	</div>
+	<div class="rainDur">
+		<div class=header>Rain Duration</div>
+		<div class=data><span id=rainDurData>___</span>&nbsp;<span class=units>s</span></div>
+	</div>
+	<div class="rainAmt">
+		<div class=header>Rain Amount</div>
+		<div class=data><span id=rainAmtData>___</span>&nbsp;<span id=rainAmtUnit class=units>in</span></div>
+	</div>
+	<div class="rainIntensity">
+		<div class=header>Rain Intensity</div>
+		<div class=data><span id=rainIntensityData>___</span>&nbsp;<span id=rainIntensityUnit class=units>in/h</span></div>
+	</div>
+        <div class="hailDur">
+                <div class=header>Hail Duration</div>
+                <div class=data><span id=hailDurData>___</span>&nbsp;<span class=units>s</span></div>
+        </div>
+        <div class="hailAmt">
+                <div class=header>Hail Amount</div>
+                <div class=data><span id=hailAmtData>___</span>&nbsp;<span id=hailAmtUnit class=units>hits/in<sup>2</sup></span></div>
+        </div>
+        <div class="hailIntensity">
+                <div class=header>Hail Intensity</div>
+                <div class=data><span id=hailIntensityData>___</span>&nbsp;<span id=hailIntensityUnit class=units>hits/in<sup>2</sup>h</span></div>
+        </div>
+        <div class="displayUnits" align=center>
+                <span align=center>
+                   <button class=button onclick=imperial()>Imperial</button>
+                   <button class=button onclick=metric()>Metric</button>
+                </span>
+        </div>
+        <div class="instrumentStatus">
+                <div class=header>Instrument Status</div>
+                <div align=right>
+                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Foobar</b></span>
+                </div>
+        </div>
+</div>
+
+<P id="response"></P>
+
+</BODY>
+</HTML>
+	
