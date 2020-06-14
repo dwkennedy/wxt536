@@ -131,17 +131,16 @@ var units = searchParams.get('units');
 if (!units) { units = document.cookie; }
 
 xmlhttpWXT.onreadystatechange = function() {
-    document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
-    if (this.readyState == 0 ) {
-        document.getElementById("instrumentStatusData").innerHTML = "Barfoo";
-    }
+    /* document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>" + this.readyState + ":" + this.status + "</span>"; */
+    if (this.readyState == 4 && this.status == 0 ) {   /* can't connect to jsonServer.py */
+        document.getElementById("instrumentStatusData").innerHTML = "<span stype='color #FF0800;'>Server Down</span>";
+    }  
 
-    if (this.readyState == 4 && this.status == 200) {
+    if (this.readyState == 4 && this.status == 200) {  /* got a response from jsonServer.py */
         var wxtArr = JSON.parse(this.responseText);
-        document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
         updateWXT(wxtArr, units);
+
 	/* document.getElementById("response").innerHTML = this.responseText; */
-		
     }
 };
 
@@ -160,6 +159,11 @@ function imperial() {
 }
 
 function updateWXT(arr, units) {
+   if (arr.valid) {
+      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
+   } else {
+      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
+   }
    var temp = parseFloat(arr.Ta.value);
    var humidity = parseFloat(arr.Ua.value);
    var dewpt = parseFloat(arr.Td.value);
@@ -219,11 +223,6 @@ function updateWXT(arr, units) {
    document.getElementById("windDirAveData").innerHTML = arr.Dm.value;
    document.getElementById("rainDurData").innerHTML = arr.Rd.value;
    document.getElementById("hailDurData").innerHTML = arr.Hd.value;
-   if (arr.valid) {
-      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #66FF00;'>Online</span>";
-   } else {
-      document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>Offline</span>";
-   }
 }
 
 function CtoF(temp) {
@@ -341,7 +340,7 @@ window.setInterval(function() {
         <div class="instrumentStatus">
                 <div class=header>Instrument Status</div>
                 <div align=right>
-                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Server Down</b></span>
+                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Query Server</b></span>
                 </div>
         </div>
 </div>
