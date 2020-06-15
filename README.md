@@ -11,7 +11,7 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     before publishing. WXT polling is controlled by GPS clock, /gps/SERIAL_NUMBER
 
 ### ingestMetTower.py
-    read files of json met data, output to netCDF4 file
+    read files of json met data (probably written by jsonListener.py), output to netCDF4 file
             
 ### jsonListener.py
     subscribe to wxt/SERIAL_NUMBER.  write all messages to json file.  open new files
@@ -26,7 +26,10 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     subscribe to wxt/SERIAL_NUMBER
     publish observations to www.pwsweather.com every PUBLISHING_INTERVAL seconds
     set pwsweather ID and PASSWORD in this file
-                
+               
+### tower_ingest.pro
+    Dave's IDL program to ingest NMEA-style strings into a netCDF file
+ 
 ### wunderground.py:
     subscribe to wxt/SERIAL_NUMBER
     publish observations to wunderground.com every PUBLISHING_INTERVAL seconds

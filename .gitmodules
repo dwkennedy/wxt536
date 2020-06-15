@@ -1,0 +1,3 @@
+[submodule "multi-sensor"]
+	path = multi-sensor
+	url = https://github.com/dwkennedy/multi-sensor
