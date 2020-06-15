@@ -59,10 +59,10 @@ REMOTE_BROKER_ADDRESS = 'kennedy.tw'  # remote MQTT broker address
 WXT_HOST = '10.0.0.72'    # The WXT serial server hostname or IP address
 WXT_PORT = 2101           # The port used by the serial server
 WXT_SERIAL = 'N3720229'   # PTU S/N N3620062
-WXT_ELEVATION = 378.0     # WXT sensor elevation in meters above MSL
+WXT_ELEVATION = 373.2     # WXT sensor elevation in meters above MSL
 WXT_POLLING_INTERVAL = 5  # seconds between polling
-USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
-#USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+#USE_GPS = True            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
+USE_GPS = False            # optionally read GPS data from MQTT /gps/SERIAL_NUMBER topic
 GPS_ANTENNA_OFFSET = -7.0 # height of gps antenna over pressure sensor; subtract from gps altitude
                           # to find pressure sensor altitude (meters)
                           # positive: gps antenna ABOVE pressure sensor
