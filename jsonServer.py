@@ -95,16 +95,15 @@ def main():
     # should use class factory to pass robot object to httpHandler
     robot = mqttHandler()
 
-    # start http server and listen for requests
-    httpd = HTTPServer((HOST_NAME, PORT_NUMBER), httpHandler)
-
     while True:
-        httpd.handle_request()
-    #try:
-    #    httpd.serve_forever()
-    #except KeyboardInterrupt:
-    #    pass
-    httpd.server_close()
+       # start http server and listen for requests
+       httpd = HTTPServer((HOST_NAME, PORT_NUMBER), httpHandler)
+
+       for foo in range(20):
+          httpd.handle_request()
+       httpd.server_close()
+       logging.info("jsonServer.py restarting - %s:%s" % (HOST_NAME, PORT_NUMBER))
+
     logging.info("jsonServer.py stops - %s:%s" % (HOST_NAME, PORT_NUMBER))
 
 
