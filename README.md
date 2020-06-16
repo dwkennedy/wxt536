@@ -20,7 +20,13 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
 ### jsonServer.py
     subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
     create http server on PORT_NUMBER and return observations as JSON
-    JSON shadow of mqtt data
+    JSON shadow of mqtt data (OBSOLETE, use jsonStatic.py to generate json
+    file to be served by webserver.  jsonServer.py python socket kept crashing)
+
+### jsonStatic.py
+    subscribe to wxt/SERIAL_NUMBER and build python dict of current observations
+    create json file and place in web server directory.  JSON shadow of
+    MQTT topic
                 
 ### pwsweather.py:
     subscribe to wxt/SERIAL_NUMBER
