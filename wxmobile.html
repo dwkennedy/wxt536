@@ -6,6 +6,7 @@
 <STYLE>
 body {
   background-color: lightblue;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -14,7 +15,6 @@ body {
 
 .grid-container {
 	display: grid;
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	grid-gap: 10px;
 	background-color: lightblue;
 	padding: 10px;
@@ -46,6 +46,7 @@ body {
 .hailDur { grid-area: hailDur;}
 .hailIntensity { grid-area: hailIntensity;}
 .displayUnits { grid-area: displayUnits; }
+.date { grid-area: date;}
 
 @media only screen and (max-width : 699px) {
 
@@ -54,10 +55,10 @@ body {
         min-width: 360px;
         max-width: 400px;
         grid-template-areas:
-           'temp             windMin'
-           'humidity         windAve'
-           'dewpoint         windMax'
-           'MSLPressure      stationPressure'
+           'temp             date'
+           'humidity         windMin'
+           'dewpoint         windAve'
+           'MSLPressure      windMax'
            'rainAmt          hailAmt'
            'rainDur          hailDur'
            'rainIntensity    hailIntensity'
@@ -73,22 +74,17 @@ body {
 	min-width: 700px;
 	max-width: 800px;
         grid-template-areas:
-           'temp        windMin         rainAmt          hailAmt'
-           'humidity    windAve         rainDur          hailDur'
-           'dewpoint    windMax         rainIntensity    hailIntensity'
-           'MSLPressure stationPressure instrumentStatus displayUnits';
+           'temp        windMin          rainAmt          hailAmt'
+           'humidity    windAve          rainDur          hailDur'
+           'dewpoint    windMax          rainIntensity    hailIntensity'
+           'MSLPressure instrumentStatus date             displayUnits';
 }
 
-}
-
-.instrumentStatus {
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-	font-size: 20px;
 }
 
 .button {
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	font-size: 15px;
+	font-weight: bold;
 	color: black;
 }
 
@@ -110,6 +106,11 @@ body {
 	text-align: right;
 }
 
+.date {
+	font-size: 12px;
+        color: yellow;
+	text-align: center;
+}
 
 </style>
 
@@ -175,8 +176,8 @@ function updateWXT(arr, units) {
       document.getElementById("tempUnit").innerHTML = ' &#xB0;F';
       document.getElementById("dewpointData").innerHTML = CtoF(dewpt).toFixed(1);
       document.getElementById("dewpointUnit").innerHTML = ' &#xB0;F';
-      document.getElementById("stationPressureUnit").innerHTML = ' inHg';
-      document.getElementById("stationPressureData").innerHTML = mbar2inhg(pressure).toFixed(2);
+      /*document.getElementById("stationPressureUnit").innerHTML = ' inHg'; 
+      document.getElementById("stationPressureData").innerHTML = mbar2inhg(pressure).toFixed(2); */
       document.getElementById("MSLPressureData").innerHTML = mbar2inhg(MSLPressure).toFixed(2);
       document.getElementById("MSLPressureUnit").innerHTML = ' inHg';
       document.getElementById("windSpdMinData").innerHTML = ms2mph(arr.Sn.value).toFixed(1);
@@ -198,8 +199,8 @@ function updateWXT(arr, units) {
       document.getElementById("tempData").innerHTML = temp.toFixed(1);
       document.getElementById("dewpointData").innerHTML = dewpt.toFixed(1);
       document.getElementById("dewpointUnit").innerHTML = ' &#xB0;C';
-      document.getElementById("stationPressureData").innerHTML = pressure.toFixed(1);
-      document.getElementById("stationPressureUnit").innerHTML = ' mbar';
+      /* document.getElementById("stationPressureData").innerHTML = pressure.toFixed(1);
+      document.getElementById("stationPressureUnit").innerHTML = ' mbar'; */
       document.getElementById("MSLPressureData").innerHTML = MSLPressure.toFixed(1);
       document.getElementById("MSLPressureUnit").innerHTML = ' mbar';
       document.getElementById("windSpdMinData").innerHTML = parseFloat(arr.Sn.value).toFixed(1);
@@ -223,6 +224,11 @@ function updateWXT(arr, units) {
    document.getElementById("windDirAveData").innerHTML = arr.Dm.value;
    document.getElementById("rainDurData").innerHTML = arr.Rd.value;
    document.getElementById("hailDurData").innerHTML = arr.Hd.value;
+   dt = new Date(arr.time*1000);
+   document.getElementById("dateData").innerHTML = dt.toDateString();
+   timeStr = dt.toTimeString();
+   timeStr = timeStr.replace("(","<br>(");
+   document.getElementById("timeData").innerHTML = timeStr;
 }
 
 function CtoF(temp) {
@@ -291,10 +297,10 @@ window.setInterval(function() {
 		<div class=header>Pressure (MSLP)</div>
 		<div class=data><span id=MSLPressureData>___._</span><span id=MSLPressureUnit class=units> inHg</span></div>
 	</div>  
-	<div class="stationPressure">
+	<!-- <div class="stationPressure">
 		<div class=header>Pressure (station)</div>
 		<div class=data><span id=stationPressureData>___._</span><span id=stationPressureUnit class=units> inHg</span></div>
-	</div>  
+	</div>   -->
 	<div class="windMin">
 		<div class=header>Wind Minimum</div>
 		<div class=data><span id=windSpdMinData>_._</span><span id=windMinUnit class=units>&nbsp;mph</span> <span id=windDirMinData>___</span>&#xB0;</div>
@@ -332,7 +338,7 @@ window.setInterval(function() {
                 <div class=data><span id=hailIntensityData>___</span>&nbsp;<span id=hailIntensityUnit class=units>hits/in<sup>2</sup>h</span></div>
         </div>
         <div class="displayUnits" align=center>
-                <span align=center>
+                <span>
                    <button class=button onclick=imperial()>Imperial</button>
                    <button class=button onclick=metric()>Metric</button>
                 </span>
@@ -340,7 +346,14 @@ window.setInterval(function() {
         <div class="instrumentStatus">
                 <div class=header>Instrument Status</div>
                 <div align=right>
-                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Connect...</b></span>
+                      <span class=data id=instrumentStatusData>Connect...</span>
+                </div>
+        </div>
+        <div class="date">
+		<!--  <div class=header>Date</div>  -->
+                <div>
+		   <div class=date id=dateData></div>
+                   <div class=date id=timeData></div>
                 </div>
         </div>
 </div>
@@ -349,4 +362,3 @@ window.setInterval(function() {
 
 </BODY>
 </HTML>
-	
