@@ -20,8 +20,7 @@ body {
 	padding: 10px;
 	margin: auto;
         border: 1px solid black;
-        /* box-shadow: 5px 10px #888888; */
-        /* width: 100%; */
+        box-shadow: 5px 10px #888888;
 }
 
 .grid-container > div {
@@ -115,10 +114,13 @@ body {
 </style>
 
 <script>
-var xmlhttpWXT = new XMLHttpRequest();
+var dt = new Date();
+var previous_time=dt.getTime()/1000 - 5;
 var urlWXT = "wx.json";
+var xmlhttpWXT = new XMLHttpRequest();
 xmlhttpWXT.open("GET", urlWXT, true);
 xmlhttpWXT.send();
+
 
 var url = new URL(window.location.href);
 var searchParams = new URLSearchParams(url.search);
@@ -126,13 +128,17 @@ var units = searchParams.get('units');
 if (!units) { units = document.cookie; }
 
 xmlhttpWXT.onreadystatechange = function() {
-    /* document.getElementById("instrumentStatusData").innerHTML = "<span style='color: #FF0800;'>" + this.readyState + ":" + this.status + "</span>"; */
+    /* document.getElementById("response").innerHTML = "<span style='color: #FF0800;'>" + this.readyState + ":" + this.status + "</span>"; */
     if (this.readyState == 4 && this.status == 0 ) {   /* can't connect to jsonServer.py */
         document.getElementById("instrumentStatusData").innerHTML = "<span stype='color #FF0800;'>Server Down</span>";
     }  
 
     if (this.readyState == 4 && this.status == 200) {  /* got a response from jsonServer.py */
-        var wxtArr = JSON.parse(this.responseText);
+        wxtArr = JSON.parse(this.responseText);
+        if (wxtArr.time <= previous_time) {
+              wxtArr.valid = 0;
+        }
+        previous_time = wxtArr.time;
         updateWXT(wxtArr, units);
 
 	/* document.getElementById("response").innerHTML = this.responseText; */
@@ -142,15 +148,14 @@ xmlhttpWXT.onreadystatechange = function() {
 function metric() {
    units='met'
    document.cookie='met';
-   xmlhttpWXT.open("GET", urlWXT, true);
-   xmlhttpWXT.send();
+   updateWXT(wxtArr,units);
 }
 
 function imperial() {
    units='imp'
    document.cookie='imp';
-   xmlhttpWXT.open("GET", urlWXT, true);
-   xmlhttpWXT.send();
+   first=1;
+   updateWXT(wxtArr,units);
 }
 
 function updateWXT(arr, units) {
@@ -335,7 +340,7 @@ window.setInterval(function() {
         <div class="instrumentStatus">
                 <div class=header>Instrument Status</div>
                 <div align=right>
-                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Query Server</b></span>
+                      <span class=data id=instrumentStatusData style='font-weight: bold;' align=right ><b>Connect...</b></span>
                 </div>
         </div>
 </div>
