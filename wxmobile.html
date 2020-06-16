@@ -184,8 +184,8 @@ function updateWXT(arr, units) {
       document.getElementById("rainIntensityData").innerHTML = mm2in(arr.Ri.value).toFixed(3);
       document.getElementById("rainAmtUnit").innerHTML = 'in';
       document.getElementById("rainIntensityUnit").innerHTML = 'in/h';
-      document.getElementById("hailAmtData").innerHTML = arr.Hc.value;
-      document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
+      document.getElementById("hailAmtData").innerHTML = arr.Hc.value.toFixed(1);
+      document.getElementById("hailIntensityData").innerHTML = arr.Hi.value.toFixed(1);
       document.getElementById("hailAmtUnit").innerHTML = 'hits/in<sup>2</sup>';
       document.getElementById("hailIntensityUnit").innerHTML = 'hits/in<sup>2</sup>h';
    } else {
@@ -207,8 +207,8 @@ function updateWXT(arr, units) {
       document.getElementById("rainIntensityData").innerHTML = parseFloat(arr.Ri.value).toFixed(2);
       document.getElementById("rainAmtUnit").innerHTML = 'mm';
       document.getElementById("rainIntensityUnit").innerHTML = 'mm/h';
-      document.getElementById("hailAmtData").innerHTML = arr.Hc.value;
-      document.getElementById("hailIntensityData").innerHTML = arr.Hi.value;
+      document.getElementById("hailAmtData").innerHTML = parseFloat(arr.Hc.value).toFixed(1);
+      document.getElementById("hailIntensityData").innerHTML = parseFloat(arr.Hi.value).toFixed(1);
       document.getElementById("hailAmtUnit").innerHTML = 'hits/mm<sup>2</sup>';
       document.getElementById("hailIntensityUnit").innerHTML = 'hits/mm<sup>2</sup>h';
    }
