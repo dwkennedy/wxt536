@@ -22,8 +22,8 @@ WXT_SERIAL = 'N3720229' # PTU S/N N3620062
 BASE_URL = "http://www.pwsweather.com/pwsupdate/pwsupdate.php"
 PUBLISHING_INTERVAL = 120   # publish every X seconds
 
-PWSWEATHER_ID = 'WEATHERBOT'  # station ID
-#PWSWEATHER_PASSWORD = secret.PWS_PASSWORD
+#PWSWEATHER_ID = secret.PWSWEATHER_ID  # station ID
+#PWSWEATHER_PASSWORD = secret.PWSWEATHER_PASSWORD
 
 current = {}  # create empty dictionary of current observations
 

@@ -22,7 +22,7 @@ BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweather
 #BASE_URL = "https://rtupdate.wunderground.com/weatherstation/updateweatherstation.php?"
 PUBLISHING_INTERVAL = 120   # publish every X seconds
 
-WUNDERGROUND_ID = 'KOKNORMA6'  # station ID
+#WUNDERGROUND_ID secret.WUNDERGROUND_ID # station ID
 #WUNDERGROUND_PASSWORD = secret.WUNDERGROUND_PASSWORD
 
 current = {}  # create empty dictionary of current observations
