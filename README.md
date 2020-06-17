@@ -41,6 +41,10 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
     publish observations to wunderground.com every PUBLISHING_INTERVAL seconds
     set wunderground ID and PASSWORD in this file
 
+### wxboot.html
+    html/css/javascript for display of weather info.  gets data from jsonServer.py
+    Uses Bootstrap 4 to make metric/imperial buttons looks nicer
+                  
 ### wxmobile.html
     html/css/javascript for display of weather info.  gets data from jsonServer.py
                   
