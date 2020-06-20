@@ -45,7 +45,7 @@ body {
 .hailAmt { grid-area: hailAmt;}
 .hailDur { grid-area: hailDur;}
 .hailIntensity { grid-area: hailIntensity;}
-.displayUnits { grid-area: displayUnits; }
+.displayUnits { grid-area: displayUnits; text-align: right;}
 .date { grid-area: date;}
 
 @media only screen and (max-width : 699px) {
@@ -338,13 +338,16 @@ window.setInterval(function() {
                 <div class=header>Hail Intensity</div>
                 <div class=data><span id=hailIntensityData>___</span>&nbsp;<span id=hailIntensityUnit class=units>hits/in<sup>2</sup>h</span></div>
         </div>
-        <div class="displayUnits" align=center>
+        <div class="displayUnits">
+            <div class=header>Display Units</div>
+              <div>
                 <span align=left>
                    <button class=button onclick=imperial()>Imperial</button>
                 </span>
 		<span align=right>
                    <button class=button onclick=metric()>Metric</button>
                 </span>
+              </div>
         </div>
         <div class="instrumentStatus">
                 <div class=header>Instrument Status</div>
