@@ -40,3 +40,11 @@ mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0RU,M=T,I=10'
 
 # reset the precip counters (do at midnight local time)
 mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0XZRU'
+
+# get the PTU sensor serial
+0TF!
+
+# get the general unit settings (inc. device s/n)
+0XF!
+
+
