@@ -2,7 +2,7 @@
 #  WXT-536 must have serial interface and baud rate configured,
 #   and put into ASCII automatic mode as well
 
-0XU,A=0,M=A,C=2,I=0,B=19200,D=8,P=N,S=1
+0XU,A=0,M=P,C=2,I=0,B=19200,D=8,P=N,S=1
 0WU,R=11111100&01001000,I=10,A=120,G=1,U=M,D=0,N=W,F=4
 0RU,R=11111100&10000000,I=10,U=M,S=M,M=T,Z=M,X=10000,Y=100
 
@@ -36,10 +36,10 @@ Y=100    hail accumulation limit (10.0 hits/cm^2) with overflow reset mode
 
 # how to send commands via decode.py command channel wxt/cmd
 #  set precip message to interval of I=10 seconds, M=T  time based
-mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0RU,M=T,I=10'
+mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0RU,M=T,I=10' -u wxt -P password
 
 # reset the precip counters (do at midnight local time)
-mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0XZRU'
+mosquitto_pub -h 127.0.0.1 -p 1883 -t wxt/cmd -m '0XZRU' -u wxt -P password
 
 # get the PTU sensor serial
 0TF!
