@@ -10,6 +10,7 @@ import paho.mqtt.client as mqtt
 #import metTower
 #from netCDF4 import Dataset
 import logging
+from secret import *
 
 BROKER_ADDRESS = '127.0.0.1'
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
@@ -63,6 +64,7 @@ class mqttHandler:
       logging.info("init mqttHandler")
       client = mqtt.Client("netcdfListener")
       client.on_message = self.on_message
+      client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
       client.connect(BROKER_ADDRESS)
       client.loop_start()
       client.subscribe('wxt/{}'.format(WXT_SERIAL))

@@ -53,6 +53,7 @@ import logging
 import json
 import paho.mqtt.client as mqtt
 import wxFormula
+from secret import *
 
 LOCAL_BROKER_ADDRESS = '127.0.0.1'  # MQTT broker address
 REMOTE_BROKER_ADDRESS = 'kennedy.tw'  # remote MQTT broker address
@@ -130,6 +131,7 @@ current_gps = {'time': gps_timeout, 'gps_time': gps_timeout}
 
 client = mqtt.Client('pbx-wxt-cmd')
 client.on_message = on_message_wxt
+client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
 client.connect(LOCAL_BROKER_ADDRESS)
 client.loop_start()
 client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))  # subscribe to command channel

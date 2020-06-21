@@ -12,6 +12,7 @@ import re
 #from urllib.parse import unquote
 import paho.mqtt.client as mqtt
 import logging
+from secret import *
 
 BROKER_ADDRESS = '127.0.0.1'
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062.  Which instrument's data to serve
