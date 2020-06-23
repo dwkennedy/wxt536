@@ -168,8 +168,9 @@ def main():
             time.sleep(sleep_time)
         else:
             # i think this could happen if there was a big delay in publishing (>PUBLISHING_INTERVAL secs)
+            #  or maybe the system clock had a big adjustment
             logging.critical("How did I get a negative sleep_time? time.time(): {} last_time:{} sleep_time: {}".format(time.time(),last_time,sleep_time))
-            break
+            #break
      
     logging.info("wunderground.py client stops")
 
