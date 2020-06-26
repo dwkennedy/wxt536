@@ -20,8 +20,8 @@ body {
 	background-color: lightblue;
 	padding: 5px;
 	margin: auto;
-        border: 1px solid black;
-        box-shadow: 5px 10px #888888;
+        /* border: 1px solid black;
+         box-shadow: 5px 10px #888888; */
 }
 
 .grid-container > div {
@@ -84,10 +84,10 @@ body {
 }
 
 .button {
-	font-size: 12px;
+	font-size: 14px;
 	font-weight: bold;
 	color: black;
-	padding: 7px;
+	padding: 5px;
 }
 
 .header {
@@ -342,12 +342,7 @@ window.setInterval(function() {
         <div class="displayUnits">
             <div class=header>Display Units</div>
               <div>
-                <span align=left>
-                   <button class=button onclick=imperial()>Imperial</button>
-                </span>
-		<span align=right>
-                   <button class=button onclick=metric()>Metric</button>
-                </span>
+                   <button class=button onclick=imperial()>Imperial</button>&nbsp;<button class=button onclick=metric()>Metric</button>
               </div>
         </div>
         <div class="instrumentStatus">
