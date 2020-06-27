@@ -224,13 +224,29 @@ function updateWXT(arr, units) {
    document.getElementById("windDirMinData").innerHTML = arr.Dn.value;
    document.getElementById("windDirMaxData").innerHTML = arr.Dx.value;
    document.getElementById("windDirAveData").innerHTML = arr.Dm.value;
-   document.getElementById("rainDurData").innerHTML = arr.Rd.value;
-   document.getElementById("hailDurData").innerHTML = arr.Hd.value;
+   document.getElementById("rainDurData").innerHTML = secToString(arr.Rd.value);
+   document.getElementById("hailDurData").innerHTML = secToString(arr.Hd.value);
    dt = new Date(arr.time*1000);
    document.getElementById("dateData").innerHTML = dt.toDateString();
    timeStr = dt.toTimeString();
    timeStr = timeStr.replace("(","<br>(");
    document.getElementById("timeData").innerHTML = timeStr;
+}
+
+function secToString(sec) {
+   sec = parseInt(sec);
+   seconds = pad(sec%60,2);
+   minutes = pad(Math.floor(sec/60)%60,2);
+   hours = pad(Math.floor(sec/3600)%24,2);
+   return(hours+":"+minutes+":"+seconds)
+}
+
+function pad(n, len) {
+    s = n.toString();
+    if (s.length < len) {
+        s = ('0000000000' + s).slice(-len);
+    }
+    return s;
 }
 
 function CtoF(temp) {
@@ -317,7 +333,7 @@ window.setInterval(function() {
 	</div>
 	<div class="rainDur">
 		<div class=header>Rain Duration</div>
-		<div class=data><span id=rainDurData>___</span>&nbsp;<span class=units>s</span></div>
+		<div class=data><span id=rainDurData>___</span>&nbsp;<span class=units>h/m/s</span></div>
 	</div>
 	<div class="rainAmt">
 		<div class=header>Rain Amount</div>
@@ -329,7 +345,7 @@ window.setInterval(function() {
 	</div>
         <div class="hailDur">
                 <div class=header>Hail Duration</div>
-                <div class=data><span id=hailDurData>___</span>&nbsp;<span class=units>s</span></div>
+                <div class=data><span id=hailDurData>___</span>&nbsp;<span class=units>h/m/s</span></div>
         </div>
         <div class="hailAmt">
                 <div class=header>Hail Amount</div>
