@@ -57,3 +57,5 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
 ### wxt.settings:
     notes on how to configure wxt-536 for ASCII mode
 
+### crontab.example
+    crontab entry to reset the accumlated rain/hail at midnight local time
