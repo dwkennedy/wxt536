@@ -61,7 +61,7 @@ def createPOST(wxt):
     dailyrainin = mm2in(0)  # 'Rc', reset at midnight local time
     rainin = mm2in(0)  # 'Ri', rain intensity in in/hr
     try:
-        baromin = mbar2inhg(float(wxt['Pa']['value'])) 
+        baromin = mbar2inhg(float(wxt['Pb']['value'])) 
         dailyrainin = mm2in(float(wxt['Rc']['value']))
         dewptf = C2F(float(wxt['Td']['value']))
         humidity = float(wxt['Ua']['value'])
@@ -107,7 +107,7 @@ def createGET(wxt):
     windgustdir = 0  # 'Dx'
     humidity = 0  # 'Ua'
     tempf = C2F(0)  #  'Ta'
-    baromin = mbar2inhg(0) # 'Pa'  # convert mbar to inHg
+    baromin = mbar2inhg(0) # 'Pb'  # convert mbar to inHg
     softwaretype = 'custom'
     dailyrainin = mm2in(0)  # 'Rc', reset at midnight local time
     rainin = mm2in(0)  # 'Ri', rain intensity in in/hr
