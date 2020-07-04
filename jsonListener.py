@@ -96,11 +96,12 @@ def main():
     # fire up mqttHandler to pub/sub to topics, reconnect when needed
     robot = mqttHandler()
 
-    while True:
+    try:
+        while True:
            logging.debug("mark")
            time.sleep(60)
-    #except KeyboardInterrupt:
-    #    pass
+    except KeyboardInterrupt:
+        pass
 
     logging.info("jsonListener.py stops")
 
