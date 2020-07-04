@@ -4,6 +4,7 @@
 #  upload data to wunderground every minute
 
 import time
+import os
 import json
 import re
 import urllib.request
@@ -15,7 +16,7 @@ import wxFormula
 import logging
 from secret import *
 
-BROKER_ADDRESS = '127.0.0.1'  # mqtt broker
+#LOCAL_BROKER_ADDRESS is set in secret.py
 WXT_SERIAL = 'N3720229' # PTU S/N N3620062
 BASE_URL = "https://weatherstation.wunderground.com/weatherstation/updateweatherstation.php?"
 # optional for realtime update
@@ -107,7 +108,19 @@ def createGET(wxt):
 #  get data from current dictionary and return values as JSON
 class mqttHandler:
 
-    # now we define the callbacks to handle messages we subcribed to
+    # The callback for when the client receives a CONNACK response from the server.
+    def on_connect(self, client, userdata, flags, rc):
+        logging.info("mqttHandler connected with result code "+str(rc))
+
+        # Subscribing in on_connect() means that if we lose the connection and
+        # reconnect then subscriptions will be renewed.
+        client.subscribe('wxt/{}'.format(WXT_SERIAL))
+
+    def on_disconnect(self, client, userdata, flags, rc):
+        # this only gets called if we issue client.disconnect() ourselves
+        logging.info("mqttHandler disconnected with result code "+str(rc))
+
+    # the callback to handle messages we subcribed to
     def on_message(self, client, userdata, message):
         global current
         #print("message topic: {}".format(message.topic))
@@ -122,14 +135,15 @@ class mqttHandler:
             logging.warning("wunderground.py failed decoding WXT json")
 
     def __init__(self):
-        # pub/sub to relavent MQTT topics so we can respond to requests with JSON
-        logging.info("registering mqttHandler")
-        client = mqtt.Client("wunderground")
+        # pub/sub to relevent MQTT topics so we can forward data periodically to wunderground
+        logging.info("mqttHandler init client wunderground-{}".format(os.getpid()))
+        client = mqtt.Client("wunderground-{}".format(os.getpid()))
+        client.on_connect = self.on_connect
+        client.on_disconnect = self.on_disconnect
         client.on_message = self.on_message
         client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
-        client.connect(BROKER_ADDRESS)
+        client.connect(LOCAL_BROKER_ADDRESS)
         client.loop_start()
-        client.subscribe('wxt/{}'.format(WXT_SERIAL))
 
 
 def main():
