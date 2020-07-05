@@ -8,6 +8,7 @@ import os
 import json
 import re
 import paho.mqtt.client as mqtt
+import ssl
 import math
 from wxFormula import *
 import logging
@@ -113,6 +114,7 @@ class mqttHandler:
         client.on_connect = self.on_connect
         client.on_message = self.on_message
         client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
+        client.tls_set(ca_certs='/etc/mosquitto/certs/server.crt',cert_reqs=ssl.CERT_NONE)
         client.connect(LOCAL_BROKER_ADDRESS, port=LOCAL_BROKER_PORT, keepalive=60)
         client.loop_start()
 

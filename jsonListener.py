@@ -8,6 +8,7 @@ import time
 import os
 import json
 import paho.mqtt.client as mqtt
+import ssl
 import logging
 from secret import *
 
@@ -75,7 +76,8 @@ class mqttHandler:
         client.on_message = self.on_message
         client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
         logging.info('mqttHandler connecting to %s',LOCAL_BROKER_ADDRESS)
-        client.connect(LOCAL_BROKER_ADDRESS)
+        client.tls_set(ca_certs='/etc/mosquitto/certs/server.crt',cert_reqs=ssl.CERT_NONE)
+        client.connect(LOCAL_BROKER_ADDRESS, port=LOCAL_BROKER_PORT)
         #client.subscribe('wxt/{}'.format(WXT_SERIAL))
         client.loop_start();  # blocking loop function to handle callbacks, reconnects, etc
         logging.debug('mqttHandler loop started')

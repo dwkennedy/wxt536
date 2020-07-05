@@ -11,6 +11,7 @@ import urllib.request
 import urllib.error
 import urllib.parse
 import paho.mqtt.client as mqtt
+import ssl
 import math
 import wxFormula
 import logging
@@ -142,7 +143,8 @@ class mqttHandler:
         client.on_disconnect = self.on_disconnect
         client.on_message = self.on_message
         client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
-        client.connect(LOCAL_BROKER_ADDRESS)
+        client.tls_set(ca_certs='/etc/mosquitto/certs/server.crt',cert_reqs=ssl.CERT_NONE)
+        client.connect(LOCAL_BROKER_ADDRESS, port=LOCAL_BROKER_PORT)
         client.loop_start()
 
 

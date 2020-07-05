@@ -53,10 +53,11 @@ import asyncio
 import logging
 import json
 import paho.mqtt.client as mqtt
+import ssl
 import wxFormula
 from secret import *
 
-LOCAL_BROKER_ADDRESS = '127.0.0.1'  # MQTT broker address
+#LOCAL_BROKER_ADDRESS defined in secret.py
 REMOTE_BROKER_ADDRESS = 'kennedy.tw'  # remote MQTT broker address
 WXT_HOST = '10.0.0.72'    # The WXT serial server hostname or IP address
 WXT_PORT = 2101           # The port used by the serial server
@@ -155,7 +156,8 @@ def main():
     client = mqtt.Client('pbx-wxt-cmd')
     client.on_message = on_message_wxt
     client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
-    client.connect(LOCAL_BROKER_ADDRESS)
+    client.tls_set(ca_certs='/etc/mosquitto/certs/server.crt',cert_reqs=ssl.CERT_NONE)
+    client.connect(LOCAL_BROKER_ADDRESS, port=LOCAL_BROKER_PORT)
     client.loop_start()
     client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))  # subscribe to command channel
     
