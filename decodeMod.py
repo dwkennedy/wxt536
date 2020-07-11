@@ -48,6 +48,7 @@
 
 import socket
 import io
+import os
 import time
 import asyncio
 import logging
@@ -77,6 +78,13 @@ file = None # global wrapper for socket
 
 # now we define the callbacks to handle messages we subcribed to
 
+def on_connect_wxt(client, userdata, flags, rc):
+    logging.info("mqttHandler connected with result code "+str(rc))
+
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))
+
 # listen for commands to send to Vaisala WXT-53X sensor
 def on_message_wxt(client, userdata, message):
     global lock
@@ -102,6 +110,13 @@ def on_message_wxt(client, userdata, message):
 
     lock = 0  # release lock
     logging.info("MQTT response %s",line)
+
+def on_connect_gps(self, client, userdata, flags, rc):
+        logging.info("mqttHandler connected to gps with result code "+str(rc))
+
+        # Subscribing in on_connect() means that if we lose the connection and
+        # reconnect then subscriptions will be renewed.
+        client.subscribe('gps/{}'.format(WXT_SERIAL))
 
 def on_message_gps(client, userdata, message):
     global gps_timeout
@@ -153,20 +168,20 @@ def main():
     gps_timeout = 0  # last time gps arrived
     current_gps = {'time': gps_timeout, 'gps_time': gps_timeout}
     
-    client = mqtt.Client('pbx-wxt-cmd')
+    client = mqtt.Client('wxt-cmd-{}'.format(os.getpid()))
+    client.on_connect = on_connect_wxt
     client.on_message = on_message_wxt
     client.username_pw_set(MQTT_USERNAME,MQTT_PASSWORD)
     client.tls_set(ca_certs='/etc/mosquitto/certs/server.crt',cert_reqs=ssl.CERT_NONE)
     client.connect(LOCAL_BROKER_ADDRESS, port=LOCAL_BROKER_PORT)
     client.loop_start()
-    client.subscribe('wxt/{}/cmd'.format(WXT_SERIAL))  # subscribe to command channel
     
     if (USE_GPS):
-        client = mqtt.Client('pbx-gps')
+        client = mqtt.Client('gps-consumer-{}'.format(os.getpid()))
         client.on_message = on_message_gps
+        client.on_connect = on_connect_gps
         client.connect(LOCAL_BROKER_ADDRESS)
         client.loop_start()
-        client.subscribe('gps/{}'.format(WXT_SERIAL))  # subscribe to command channel
     
         time.sleep(1.1) # let gps load up a measurement
         old_tick = 0
