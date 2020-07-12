@@ -144,15 +144,9 @@ class SocketIO(io.RawIOBase):
     def seekable(self):
         return False
 
-def main():
-    global lock
-    global s
-    global file
-
-    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
-    logging.info("decodeMod.py starts")
-    
+# function to open connection to wxt serial.  loops until connected
+def open_wxt(host, port):
+    global s,file
     while True:
        try:
           s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -162,9 +156,19 @@ def main():
        except(ConnectionRefusedError):
           logging.warning("connection refused to WXT-536 serial server")
           time.sleep(5)
-    
-    file = SocketIO(s)
-    
+    file = SocketIO(s)  # wrapper to read lines from socket
+
+def main():
+    global lock
+    global s
+    global file
+
+    FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+    logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+    logging.info("decodeMod.py starts")
+   
+    open_wxt(WXT_HOST, WXT_PORT)
+ 
     gps_timeout = 0  # last time gps arrived
     current_gps = {'time': gps_timeout, 'gps_time': gps_timeout}
     
@@ -225,37 +229,41 @@ def main():
             time.sleep(0.1)
         lock = 1
         logging.debug("flushing wxt input buffer")
-        s.setblocking(False)
-        while True:
-           try:
-              cruft = s.recv(0x7FFFFFFF).decode('ISO-8859-1')
-              logging.debug("cruft: %s", cruft)  # flush input buffer
-           except(BlockingIOError):
-              #logging.debug("no cruft")
-              break
-        s.settimeout(WXT_POLLING_INTERVAL/2)
-        logging.debug("sending 0R command")
-        s.send(u'0R\r\n'.encode())  # send command to return all sentences
-        logging.debug("reading sentences")
-        param = {'time': int(time.time())} # reset params; timer marks when poll sent
-        for index in range(4):  # read four lines of response (0R1,0R2,0R3,0R5)
-           try:
-              line=file.readline().decode('ISO-8859-1')
-           except:
-              logging.warning("timeout reading from WXT-536")
-              break
-           #logging.debug(line.strip())
-           chunks = line.strip().split(',')
-           chunks = chunks[1:]  # drop initial 0R[1235]
-           for chunk in chunks:
+        try:  # catch serial errors
+           s.setblocking(False)
+           while True:
               try:
-                (label, content) = chunk.split('=',1)
-                value = content[:-1]
-                unit = content[-1]
-                param[label] = {'value': value, 'unit': unit}
+                 cruft = s.recv(0x7FFFFFFF).decode('ISO-8859-1')
+                 logging.debug("cruft: %s", cruft)  # flush input buffer
+              except(BlockingIOError):
+                 #logging.debug("no cruft")
+                 break
+           s.settimeout(WXT_POLLING_INTERVAL/2)
+           logging.debug("sending 0R command")
+           s.send(u'0R\r\n'.encode())  # send command to return all sentences
+           logging.debug("reading sentences")
+           param = {'time': int(time.time())} # reset params; timer marks when poll sent
+           for index in range(4):  # read four lines of response (0R1,0R2,0R3,0R5)
+              try:
+                 line=file.readline().decode('ISO-8859-1')
               except:
-                logging.debug("bad chunk: %s", chunk)
-                break
+                 logging.warning("timeout reading from WXT-536")
+                 break
+              #logging.debug(line.strip())
+              chunks = line.strip().split(',')
+              chunks = chunks[1:]  # drop initial 0R[1235]
+              for chunk in chunks:
+                 try:
+                    (label, content) = chunk.split('=',1)
+                    value = content[:-1]
+                    unit = content[-1]
+                    param[label] = {'value': value, 'unit': unit}
+                 except:
+                    logging.debug("bad chunk: %s", chunk)
+                    break
+        except Exception as e:
+           logging.error("caught error {}".format(e))
+           open_wxt(WXT_HOST, WXT_PORT)
 
         lock = 0  # release serial port lock
     

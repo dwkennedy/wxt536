@@ -84,7 +84,7 @@ class mqttHandler:
 
 def main():
     FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%m/%d/%Y %H:%M:%S')
 
     logging.info("jsonListener.py starts")
 

@@ -22,14 +22,17 @@ TARGET_FILENAME = '/var/www/html/wx/wx.json'
 current = {'valid': 0, 'time': 0}
 
 def write_JSON(wxt):
-        
-        if ((time.time() - float(current['time']))<TIMEOUT):
-           wxt['valid'] = 1;
-        else:
+       
+        try: 
+           if ((time.time() - float(current['time']))<TIMEOUT):
+              wxt['valid'] = 1;
+           else:
+              wxt['valid'] = 0;
+        except KeyError:
            wxt['valid'] = 0;
       
         try:
-           logging.info(json.dumps(wxt))
+           logging.debug(json.dumps(wxt))
            file = open(TARGET_FILENAME,'w',encoding='utf-8')
            file.write(json.dumps(wxt))
            file.close()
