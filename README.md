@@ -59,3 +59,14 @@ python code for Vaisala wxt536 decoding, MQTT publishing, and wunderground PWS u
 
 ### crontab.example
     crontab entry to reset the accumlated rain/hail at midnight local time
+
+decodeMod.py
+jsonListener.py
+jsonStatic.py
+pwsweather.py
+sqlListener.py
+wunderground.py
+
+1wire:
+code_3.py 8888
+rrddtool-mqtt.py
